@@ -6,6 +6,7 @@ import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
+import 'package:very_good_slide_puzzle/simple/cube_puzzle_tile.dart';
 import 'package:very_good_slide_puzzle/simple/simple.dart';
 import 'package:very_good_slide_puzzle/theme/theme.dart';
 import 'package:very_good_slide_puzzle/typography/typography.dart';
@@ -134,26 +135,12 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
 
   @override
   Widget tileBuilder(Tile tile, PuzzleState state) {
-    return ResponsiveLayoutBuilder(
-      small: (_, __) => SimplePuzzleTile(
-        key: Key('simple_puzzle_tile_${tile.value}_small'),
+    return CubePuzzleTile(
+        //key: Key('simple_puzzle_tile_${tile.value}_small'),
         tile: tile,
-        tileFontSize: _TileFontSize.small,
+        //tileFontSize: _TileFontSize.small,
         state: state,
-      ),
-      medium: (_, __) => SimplePuzzleTile(
-        key: Key('simple_puzzle_tile_${tile.value}_medium'),
-        tile: tile,
-        tileFontSize: _TileFontSize.medium,
-        state: state,
-      ),
-      large: (_, __) => SimplePuzzleTile(
-        key: Key('simple_puzzle_tile_${tile.value}_large'),
-        tile: tile,
-        tileFontSize: _TileFontSize.large,
-        state: state,
-      ),
-    );
+      );
   }
 
   @override
@@ -279,13 +266,13 @@ class SimplePuzzleBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      padding: EdgeInsets.zero,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: size,
-      mainAxisSpacing: spacing,
-      crossAxisSpacing: spacing,
+    return Stack(
+      // padding: EdgeInsets.zero,
+      // shrinkWrap: true,
+      // physics: const NeverScrollableScrollPhysics(),
+      // crossAxisCount: size,
+      // mainAxisSpacing: spacing,
+      // crossAxisSpacing: spacing,
       children: tiles,
     );
   }
@@ -324,40 +311,44 @@ class SimplePuzzleTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
 
-    return TextButton(
-      style: TextButton.styleFrom(
-        primary: PuzzleColors.white,
-        textStyle: PuzzleTextStyle.headline2.copyWith(
-          fontSize: tileFontSize,
-        ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(12),
+    return AnimatedSlide(
+      offset: Offset(0, 0),
+      duration: const Duration(milliseconds: 100),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          primary: PuzzleColors.white,
+          textStyle: PuzzleTextStyle.headline2.copyWith(
+            fontSize: tileFontSize,
+          ),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(12),
+            ),
+          ),
+        ).copyWith(
+          foregroundColor: MaterialStateProperty.all(PuzzleColors.white),
+          backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+            (states) {
+              if (tile.value == state.lastTappedTile?.value) {
+                return theme.pressedColor;
+              } else if (states.contains(MaterialState.hovered)) {
+                return theme.hoverColor;
+              } else {
+                return theme.defaultColor;
+              }
+            },
           ),
         ),
-      ).copyWith(
-        foregroundColor: MaterialStateProperty.all(PuzzleColors.white),
-        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-          (states) {
-            if (tile.value == state.lastTappedTile?.value) {
-              return theme.pressedColor;
-            } else if (states.contains(MaterialState.hovered)) {
-              return theme.hoverColor;
-            } else {
-              return theme.defaultColor;
-            }
-          },
-        ),
-      ),
-      onPressed: state.puzzleStatus == PuzzleStatus.incomplete
-          ? () => context.read<PuzzleBloc>().add(TileTapped(tile))
-          : null,
-      child: Text(
-        tile.value.toString(),
-        semanticsLabel: context.l10n.puzzleTileLabelText(
+        onPressed: state.puzzleStatus == PuzzleStatus.incomplete
+            ? () => context.read<PuzzleBloc>().add(TileTapped(tile))
+            : null,
+        child: Text(
           tile.value.toString(),
-          tile.currentPosition.x.toString(),
-          tile.currentPosition.y.toString(),
+          semanticsLabel: context.l10n.puzzleTileLabelText(
+            tile.value.toString(),
+            tile.currentPosition.x.toString(),
+            tile.currentPosition.y.toString(),
+          ),
         ),
       ),
     );
