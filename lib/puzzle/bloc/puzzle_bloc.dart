@@ -2,8 +2,11 @@
 
 import 'dart:math';
 
+import 'package:angles/angles.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:very_good_slide_puzzle/models/cube.dart';
+import 'package:very_good_slide_puzzle/models/cube_faces.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 
 part 'puzzle_event.dart';
@@ -146,6 +149,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         if (i == size * size)
           Tile(
             value: i,
+            cube: const Cube(visibleFace: Face.A,orientation: Angle.degrees(0)),
             correctPosition: whitespacePosition,
             currentPosition: currentPositions[i - 1],
             isWhitespace: true,
@@ -153,6 +157,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         else
           Tile(
             value: i,
+            cube: const Cube(visibleFace: Face.A,orientation: Angle.degrees(0)),
             correctPosition: correctPositions[i - 1],
             currentPosition: currentPositions[i - 1],
           )

@@ -1,4 +1,7 @@
+import 'package:angles/angles.dart';
 import 'package:equatable/equatable.dart';
+import 'package:very_good_slide_puzzle/models/cube.dart';
+import 'package:very_good_slide_puzzle/models/cube_faces.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 
 /// {@template tile}
@@ -8,6 +11,7 @@ class Tile extends Equatable {
   /// {@macro tile}
   const Tile({
     required this.value,
+    required this.cube,
     required this.correctPosition,
     required this.currentPosition,
     this.isWhitespace = false,
@@ -15,6 +19,9 @@ class Tile extends Equatable {
 
   /// Value representing the correct position of [Tile] in a list.
   final int value;
+  
+  ///cube that the tile represents. 
+  final Cube cube;
 
   /// The correct 2D [Position] of the [Tile]. All tiles must be in their
   /// correct position to complete the puzzle.
@@ -27,9 +34,10 @@ class Tile extends Equatable {
   final bool isWhitespace;
 
   /// Create a copy of this [Tile] with updated current position.
-  Tile copyWith({required Position currentPosition}) {
+  Tile copyWith({required Position currentPosition,required Cube cube}) {
     return Tile(
       value: value,
+      cube: cube,
       correctPosition: correctPosition,
       currentPosition: currentPosition,
       isWhitespace: isWhitespace,
@@ -44,3 +52,5 @@ class Tile extends Equatable {
         isWhitespace,
       ];
 }
+
+

@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:very_good_slide_puzzle/models/cube.dart';
+import 'package:very_good_slide_puzzle/models/cube_movement.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 
 // A 3x3 puzzle board visualization:
@@ -194,11 +196,19 @@ class Puzzle extends Equatable {
       final whitespaceTileIndex = tiles.indexOf(whitespaceTile);
 
       // Swap current board positions of the moving tile and the whitespace.
+
+      final newCube =rollCube(
+          cube: tile.cube,
+          movementDirection: MovementDirection.right,
+        );
+
       tiles[tileIndex] = tile.copyWith(
         currentPosition: whitespaceTile.currentPosition,
+        cube: newCube,
       );
       tiles[whitespaceTileIndex] = whitespaceTile.copyWith(
         currentPosition: tile.currentPosition,
+        cube:tile.cube,
       );
     }
 

@@ -11,6 +11,7 @@ import 'package:very_good_slide_puzzle/dashatar/dashatar.dart';
 import 'package:very_good_slide_puzzle/helpers/helpers.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
+import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/theme/themes/themes.dart';
@@ -292,14 +293,14 @@ class CubeSide extends StatelessWidget {
                 _position2Controller.forward();
               }
               //if (kDebugMode) {
-                print('hello');
+                //print('hello');
               //}
 
               context.read<PuzzleBloc>().add(TileTapped(widget.tile));
             }
           : null,
       child: Text(
-        widget.tile.value.toString(),
+        faceValues[0][widget.tile.cube.visibleFace.index].toString(),
         semanticsLabel: context.l10n.puzzleTileLabelText(
           widget.tile.value.toString(),
           widget.tile.currentPosition.x.toString(),
