@@ -1,20 +1,12 @@
-import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:very_good_slide_puzzle/audio_control/audio_control.dart';
-import 'package:very_good_slide_puzzle/colors/colors.dart';
-import 'package:very_good_slide_puzzle/dashatar/dashatar.dart';
-import 'package:very_good_slide_puzzle/helpers/helpers.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
 import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
-import 'package:very_good_slide_puzzle/theme/themes/themes.dart';
 import 'package:very_good_slide_puzzle/typography/text_styles.dart';
 
 abstract class _TileSize {
@@ -49,23 +41,60 @@ class CubePuzzleTile extends StatefulWidget {
 @visibleForTesting
 class CubePuzzleTileState extends State<CubePuzzleTile>
     with TickerProviderStateMixin {
-  AudioPlayer? _audioPlayer;
-  late final Timer _timer;
-
   /// The controller that drives [_scale] animation.
   late AnimationController _scaleController;
   late Animation<double> _scale;
 
-  late AnimationController _rotateController;
-  late Animation<double> _rotate;
+  late AnimationController _movementController;
 
-  late AnimationController _positionController;
-  late Animation<Offset> _position;
+  //late AnimationController _face1YRotationController;
 
-    late AnimationController _position2Controller;
-  late Animation<Offset> _position2;
+  late Animation<double> _face1YRotation =
+      Tween<double>(begin: 0, end: 0).animate(
+    _movementController,
+  );
 
-  final Duration _movementDuration = const Duration(milliseconds: 500);
+  //late AnimationController _face2YRotationController;
+  late Animation<double> _face2YRotation =
+      Tween<double>(begin: 0, end: 0).animate(
+    _movementController,
+  );
+
+  //late AnimationController _face1XRotationController;
+  late Animation<double> _face1XRotation =
+      Tween<double>(begin: 0, end: 0).animate(
+    _movementController,
+  );
+
+  //late AnimationController _face2XRotationController;
+  late Animation<double> _face2XRotation =
+      Tween<double>(begin: 0, end: 0).animate(
+    _movementController,
+  );
+
+  //late AnimationController _face1PositionController;
+  late Animation<Offset> _face1Position = Tween<Offset>(
+    begin: Offset.zero,
+    end: Offset.zero,
+  ).animate(_movementController);
+
+  //late AnimationController _face2Position2Controller;
+  late Animation<Offset> _face2Position = Tween<Offset>(
+    begin: Offset.zero,
+    end: Offset.zero,
+  ).animate(_movementController);
+
+  final Duration _movementDuration = const Duration(milliseconds: 400);
+
+  late int _face1Value =
+      faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
+
+  late int _face2Value =
+      faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
+
+  late AlignmentGeometry _face1PositionAlignment = Alignment.center;
+
+  late AlignmentGeometry _face2PositionAlignment = Alignment.center;
 
   @override
   void initState() {
@@ -76,164 +105,265 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       duration: _movementDuration,
     );
 
-    _scale = Tween<double>(begin: 1, end: 0.94).animate(
+    _scale = Tween<double>(begin: 1, end: 1.1).animate(
       CurvedAnimation(
         parent: _scaleController,
         curve: const Interval(0, 1, curve: Curves.easeInOut),
       ),
     );
 
-    _positionController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-
-    _position = Tween<Offset>(begin: Offset.zero, end: Offset(1, 0)).animate(
-      //CurvedAnimation(
-      //  parent:
-      _positionController,
-      //  curve: const Interval(0, 1, curve: Curves.easeInOut),
-      //),
-    );
-
-        _position2Controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-
-    _position2 = Tween<Offset>(begin:Offset(-1, 0) , end: Offset.zero).animate(
-      //CurvedAnimation(
-      //  parent:
-      _position2Controller,
-      //  curve: const Interval(0, 1, curve: Curves.easeInOut),
-      //),
-    );
-
-    _rotateController = AnimationController(
+    _movementController = AnimationController(
       vsync: this,
       duration: _movementDuration,
-    );
-
-    _rotate = Tween<double>(begin: 0, end: -pi / 2).animate(
-      _rotateController,
     );
   }
 
   @override
+  void didUpdateWidget(CubePuzzleTile oldWidget) {
+    if (!((widget.tile.currentPosition.x == oldWidget.tile.currentPosition.x) &&
+        (widget.tile.currentPosition.y == oldWidget.tile.currentPosition.y))) {
+      _movementController.reset();
+
+      _face1Position = Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(
+          (widget.tile.currentPosition.x - widget.tile.previousPosition!.x)
+              .toDouble(),
+          (widget.tile.currentPosition.y - widget.tile.previousPosition!.y)
+              .toDouble(),
+        ),
+      ).animate(
+        _movementController,
+      );
+
+      _face2Position = Tween<Offset>(
+        begin: Offset(
+          (widget.tile.currentPosition.x - widget.tile.previousPosition!.x)
+                  .toDouble() *
+              -1,
+          (widget.tile.currentPosition.y - widget.tile.previousPosition!.y)
+                  .toDouble() *
+              -1,
+        ),
+        end: Offset.zero,
+      ).animate(
+        _movementController,
+      );
+
+      _face1Value = faceValues[oldWidget.tile.value]
+          [oldWidget.tile.cube!.visibleFace.index];
+
+      _face2Value =
+          faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
+
+      if (widget.tile.currentPosition.x > oldWidget.tile.currentPosition.x) {
+        print(widget.tile.value.toString() + "movedRight");
+
+        _face1PositionAlignment = Alignment.centerLeft;
+
+        _face2PositionAlignment = Alignment.centerRight;
+
+        _face1YRotation = Tween<double>(begin: 0, end: -pi / 2).animate(
+          _movementController,
+        );
+
+        _face2YRotation = Tween<double>(begin: pi / 2, end: 0).animate(
+          _movementController,
+        );
+
+        _face1XRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _face2XRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _movementController.forward();
+      }
+
+      if (widget.tile.currentPosition.x < oldWidget.tile.currentPosition.x) {
+        print(widget.tile.value.toString() + "movedLeft");
+
+        _face1PositionAlignment = Alignment.centerRight;
+
+        _face2PositionAlignment = Alignment.centerLeft;
+
+        _face1YRotation = Tween<double>(begin: 0, end: pi / 2).animate(
+          _movementController,
+        );
+
+        _face2YRotation = Tween<double>(begin: -pi / 2, end: 0).animate(
+          _movementController,
+        );
+
+        _face1XRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _face2XRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _movementController.forward();
+      }
+
+      if (widget.tile.currentPosition.y > oldWidget.tile.currentPosition.y) {
+        print(widget.tile.value.toString() + "movedDown");
+
+        _face1PositionAlignment = Alignment.topCenter;
+
+        _face2PositionAlignment = Alignment.bottomCenter;
+
+        _face1XRotation = Tween<double>(begin: 0, end: pi / 2).animate(
+          _movementController,
+        );
+
+        _face2XRotation = Tween<double>(begin: -pi / 2, end: 0).animate(
+          _movementController,
+        );
+
+        _face1YRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _face2YRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _movementController.forward();
+      }
+
+      if (widget.tile.currentPosition.y < oldWidget.tile.currentPosition.y) {
+        print(widget.tile.value.toString() + "movedUp");
+
+        _face1PositionAlignment = Alignment.bottomCenter;
+
+        _face2PositionAlignment = Alignment.topCenter;
+
+        _face1XRotation = Tween<double>(begin: 0, end: -pi / 2).animate(
+          _movementController,
+        );
+
+        _face2XRotation = Tween<double>(begin: pi / 2, end: 0).animate(
+          _movementController,
+        );
+
+        _face1YRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _face2YRotation = Tween<double>(begin: 0, end: 0).animate(
+          _movementController,
+        );
+
+        _movementController.forward();
+      }
+
+      print(
+          "Visible value :${faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index]}");
+    }
+
+    super.didUpdateWidget(widget);
+  }
+
+  @override
   void dispose() {
-    _timer.cancel();
-    _audioPlayer?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = widget.state.puzzle.getDimension();
-    final theme = context.select((DashatarThemeBloc bloc) => bloc.state.theme);
-    final status =
-        context.select((DashatarPuzzleBloc bloc) => bloc.state.status);
-    final hasStarted = status == DashatarPuzzleStatus.started;
     final puzzleIncomplete =
         context.select((PuzzleBloc bloc) => bloc.state.puzzleStatus) ==
             PuzzleStatus.incomplete;
 
     final canPress = puzzleIncomplete;
 
-    return AudioControlListener(
-      audioPlayer: _audioPlayer,
-      child: AnimatedAlign(
-        alignment: FractionalOffset(
-          (widget.tile.currentPosition.x - 1) / (size - 1),
-          (widget.tile.currentPosition.y - 1) / (size - 1),
+    return AnimatedAlign(
+      alignment: FractionalOffset(
+        (widget.tile.currentPosition.x - 1) / (size - 1),
+        (widget.tile.currentPosition.y - 1) / (size - 1),
+      ),
+      duration: _movementDuration,
+      curve: Curves.easeInOut,
+      child: ResponsiveLayoutBuilder(
+        small: (_, child) => SizedBox.square(
+          key: Key('dashatar_puzzle_tile_small_${widget.tile.value}'),
+          dimension: _TileSize.small,
+          child: child,
         ),
-        duration: _movementDuration,
-        curve: Curves.easeInOut,
-        child: ResponsiveLayoutBuilder(
-          small: (_, child) => SizedBox.square(
-            key: Key('dashatar_puzzle_tile_small_${widget.tile.value}'),
-            dimension: _TileSize.small,
-            child: child,
-          ),
-          medium: (_, child) => SizedBox.square(
-            key: Key('dashatar_puzzle_tile_medium_${widget.tile.value}'),
-            dimension: _TileSize.medium,
-            child: child,
-          ),
-          large: (_, child) => SizedBox.square(
-            key: Key('dashatar_puzzle_tile_large_${widget.tile.value}'),
-            dimension: _TileSize.large,
-            child: child,
-          ),
-          child: (_) => MouseRegion(
-            onEnter: (_) {
-              if (canPress) {
-                _scaleController.forward();
-              }
-            },
-            onExit: (_) {
-              if (canPress) {
-                _scaleController.reverse();
-              }
-            },
-            child: ScaleTransition(
-              key: Key('dashatar_puzzle_tile_scale_${widget.tile.value}'),
-              scale: _scale,
-              child: AnimatedBuilder(
-                animation: _rotate,
-                builder: (context, child) => Stack(
-                    //alignment: Alignment.centerRight,
-                    fit: StackFit.passthrough,
-                    children: <Widget>[
-                      SlideTransition(
-                          position: _position,
-                          child: Transform(
-                            alignment: Alignment.centerLeft,
-                            transform: Matrix4.identity()
-                              ..setEntry(3, 2, 0.001)
-                              ..rotateY(_rotate.value),
-                            //(,
-                            //alignment: FractionalOffset.centerRight,
-                            child: CubeSide(
-                                widget: widget,
-                                theme: theme,
-                                canPress: canPress,
-                                rotateController: _rotateController,
-                                positionController: _positionController,
-                                position2Controller: _position2Controller),
-                          )),
-
-                       SlideTransition(
-                           position: _position2,
-                           child: 
-                          Transform(
-                            alignment: Alignment.centerRight,
-                            transform: Matrix4.identity()
-                              ..setEntry(3, 2, 0.001)
-                              ..rotateY(_rotate.value+(pi/2)),
-                              
-                            //alignment: FractionalOffset.centerRight,
-                            child: CubeSide(
-                                widget: widget,
-                                theme: theme,
-                                canPress: canPress,
-                                rotateController: _rotateController,
-                                positionController: _positionController,
-                                position2Controller: _position2Controller),
-                          )
-                          )
-
-                      //                   Transform(
-                      //   transform: Matrix4.identity()
-                      //     ..setEntry(3, 2, 0.003)
-                      //     ..rotateY(pi *2 - _rotate.value  ),
-                      //   //alignment: FractionalOffset.centerRight,
-                      //   child: CubeSide(
-                      //       widget: widget,
-                      //       theme: theme,
-                      //       canPress: canPress,
-                      //       rotateController: _rotateController),
-                      // ),
-                    ]),
+        medium: (_, child) => SizedBox.square(
+          key: Key('dashatar_puzzle_tile_medium_${widget.tile.value}'),
+          dimension: _TileSize.medium,
+          child: child,
+        ),
+        large: (_, child) => SizedBox.square(
+          key: Key('dashatar_puzzle_tile_large_${widget.tile.value}'),
+          dimension: _TileSize.large,
+          child: child,
+        ),
+        child: (_) => MouseRegion(
+          onEnter: (_) {
+            if (canPress) {
+              _scaleController.forward();
+            }
+          },
+          onExit: (_) {
+            if (canPress) {
+              _scaleController.reverse();
+            }
+          },
+          child: ScaleTransition(
+            key: Key('simple_puzzle_tile_scale_${widget.tile.value}'),
+            scale: _scale,
+            child: AnimatedBuilder(
+              animation: _face1YRotation,
+              builder: (context, child) => Stack(
+                fit: StackFit.passthrough,
+                children: <Widget>[
+                  SlideTransition(
+                    position: _face1Position,
+                    child: Transform(
+                      alignment: _face1PositionAlignment,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateY(_face1YRotation.value)
+                        ..rotateX(_face1XRotation.value),
+                      child: CubeFace(
+                          text: _face1Value.toString(),
+                          tile: widget.tile,
+                          onPressed: () {
+                            if (canPress) {
+                              context
+                                  .read<PuzzleBloc>()
+                                  .add(TileTapped(widget.tile));
+                            }
+                          }),
+                    ),
+                  ),
+                  SlideTransition(
+                    position: _face2Position,
+                    child: Transform(
+                      alignment: _face2PositionAlignment,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateY(_face2YRotation.value)
+                        ..rotateX(_face2XRotation.value),
+                      child: CubeFace(
+                          text: _face2Value.toString(),
+                          tile: widget.tile,
+                          onPressed: () {
+                            if (canPress) {
+                              context
+                                  .read<PuzzleBloc>()
+                                  .add(TileTapped(widget.tile));
+                            }
+                          }),
+                    ),
+                  )
+                ],
               ),
             ),
           ),
@@ -243,68 +373,43 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   }
 }
 
-class CubeSide extends StatelessWidget {
-  const CubeSide({
+class CubeFace extends StatelessWidget {
+  const CubeFace({
     Key? key,
-    required this.widget,
-    required this.theme,
-    required this.canPress,
-    required AnimationController rotateController,
-    required AnimationController positionController,
-    required AnimationController position2Controller,
-  })  : _rotateController = rotateController,
-        _positionController = positionController, _position2Controller = position2Controller,
-        super(key: key);
+    required this.text,
+    required this.tile,
+    required this.onPressed,
+  }) : super(key: key);
 
-  final CubePuzzleTile widget;
+  final String text;
 
-  final DashatarTheme theme;
-  final bool canPress;
-  final AnimationController _rotateController;
-  final AnimationController _positionController;
-  final AnimationController _position2Controller;
+  final Tile tile;
+
+  final Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      //padding: EdgeInsets.zero,
       style: TextButton.styleFrom(
         backgroundColor: Colors.blueGrey,
-        textStyle: PuzzleTextStyle.headline2.copyWith(
-            //fontSize: 20,
-            ),
+        textStyle: PuzzleTextStyle.headline2.copyWith(),
         shape: const RoundedRectangleBorder(
           side: BorderSide(
-              color: Colors.blue, width: 20, style: BorderStyle.solid),
+            color: Colors.blue,
+            width: 20,
+          ),
           borderRadius: BorderRadius.all(
             Radius.circular(12),
           ),
         ),
       ),
-      onPressed: canPress
-          ? () {
-              if (_rotateController.status == AnimationStatus.completed) {
-                _rotateController.reverse();
-                _positionController.reverse();
-                _position2Controller.reverse();
-              } else {
-                _rotateController.forward();
-                _positionController.forward();
-                _position2Controller.forward();
-              }
-              //if (kDebugMode) {
-                //print('hello');
-              //}
-
-              context.read<PuzzleBloc>().add(TileTapped(widget.tile));
-            }
-          : null,
+      onPressed: onPressed,
       child: Text(
-        faceValues[0][widget.tile.cube.visibleFace.index].toString(),
+        text,
         semanticsLabel: context.l10n.puzzleTileLabelText(
-          widget.tile.value.toString(),
-          widget.tile.currentPosition.x.toString(),
-          widget.tile.currentPosition.y.toString(),
+          tile.value.toString(),
+          tile.currentPosition.x.toString(),
+          tile.currentPosition.y.toString(),
         ),
       ),
     );

@@ -11,21 +11,25 @@ class Tile extends Equatable {
   /// {@macro tile}
   const Tile({
     required this.value,
-    required this.cube,
+    this.cube,
     required this.correctPosition,
+    this.previousPosition,
     required this.currentPosition,
     this.isWhitespace = false,
   });
 
   /// Value representing the correct position of [Tile] in a list.
   final int value;
-  
-  ///cube that the tile represents. 
-  final Cube cube;
+
+  ///cube that the tile represents.
+  final Cube? cube;
 
   /// The correct 2D [Position] of the [Tile]. All tiles must be in their
   /// correct position to complete the puzzle.
   final Position correctPosition;
+
+  /// The current 2D [Position] of the [Tile].
+  final Position? previousPosition;
 
   /// The current 2D [Position] of the [Tile].
   final Position currentPosition;
@@ -34,12 +38,17 @@ class Tile extends Equatable {
   final bool isWhitespace;
 
   /// Create a copy of this [Tile] with updated current position.
-  Tile copyWith({required Position currentPosition,required Cube cube}) {
+  Tile copyWith({
+    Position? updatedCurrentPosition,
+    Cube? updatedCube,
+    Position? updatedPreviousPosition,
+  }) {
     return Tile(
       value: value,
-      cube: cube,
+      cube: updatedCube ?? cube,
+      previousPosition: updatedPreviousPosition ?? previousPosition,
       correctPosition: correctPosition,
-      currentPosition: currentPosition,
+      currentPosition: updatedCurrentPosition ?? currentPosition,
       isWhitespace: isWhitespace,
     );
   }
@@ -52,5 +61,3 @@ class Tile extends Equatable {
         isWhitespace,
       ];
 }
-
-

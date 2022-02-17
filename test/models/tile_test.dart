@@ -33,7 +33,7 @@ void main() {
             value: value,
             correctPosition: position,
             currentPosition: position,
-          ).copyWith(currentPosition: newPosition),
+          ).copyWith(updatedCurrentPosition: newPosition),
           equals(
             Tile(
               value: value,

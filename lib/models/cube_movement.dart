@@ -63,15 +63,15 @@ Angle calculateCubeOrientationChange({
   required Face endFace,
 }) {
   final movementRuleIndex = movementRules.indexWhere(
-      (MovementRule movementRule) =>
-          ((startFace == movementRule.startFace) &&
-              (endFace == movementRule.endFace)) ||
-          ((startFace == movementRule.endFace) &&
-              (endFace == movementRule.startFace)),);
+    (MovementRule movementRule) =>
+        ((startFace == movementRule.startFace) &&
+            (endFace == movementRule.endFace)) ||
+        ((startFace == movementRule.endFace) &&
+            (endFace == movementRule.startFace)),
+  );
   if (movementRuleIndex == -1) {
     return const Angle.degrees(0);
-  }
-  else if (movementRules[movementRuleIndex].startFace == startFace) {
+  } else if (movementRules[movementRuleIndex].startFace == startFace) {
     return movementRules[movementRuleIndex].orientationChange;
   } else if (movementRules[movementRuleIndex].startFace == endFace) {
     return movementRules[movementRuleIndex].orientationChange +
@@ -108,8 +108,7 @@ class FaceRelationship {
   final Face faceToLeft;
 }
 
-//List of Side relationships for all sides when  side is oriented at 0 degrees
-
+///List of Side relationships for all sides when  side is oriented at 0 degrees
 const List<FaceRelationship> faceRelationships = [
   FaceRelationship(
     visibleFace: Face.A,
@@ -170,6 +169,7 @@ enum MovementDirection {
   left,
 
   ///
+  none,
 }
 
 ///Calculate the new cube given the current visible face , movement
@@ -188,44 +188,55 @@ Cube rollCube({
         visibleFace: cube.visibleFace,
         orientation: cube.orientation,
       );
-      newOrientation = cube.orientation + calculateCubeOrientationChange(
-        startFace: cube.visibleFace,
-        endFace: newVisibleFace,
-      );
+      newOrientation = cube.orientation +
+          calculateCubeOrientationChange(
+            startFace: cube.visibleFace,
+            endFace: newVisibleFace,
+          );
       break;
     case MovementDirection.right:
       newVisibleFace = calculateCorrectedFaceToLeft(
         visibleFace: cube.visibleFace,
         orientation: cube.orientation,
       );
-      newOrientation = cube.orientation + calculateCubeOrientationChange(
-        startFace: cube.visibleFace,
-        endFace: newVisibleFace,
-      );
+      newOrientation = cube.orientation +
+          calculateCubeOrientationChange(
+            startFace: cube.visibleFace,
+            endFace: newVisibleFace,
+          );
       break;
     case MovementDirection.down:
       newVisibleFace = calculateCorrectedFaceToTop(
         visibleFace: cube.visibleFace,
         orientation: cube.orientation,
       );
-      newOrientation = cube.orientation + calculateCubeOrientationChange(
-        startFace: cube.visibleFace,
-        endFace: newVisibleFace,
-      );
+      newOrientation = cube.orientation +
+          calculateCubeOrientationChange(
+            startFace: cube.visibleFace,
+            endFace: newVisibleFace,
+          );
       break;
     case MovementDirection.left:
       newVisibleFace = calculateCorrectedFaceToRight(
         visibleFace: cube.visibleFace,
         orientation: cube.orientation,
       );
-      newOrientation = cube.orientation + calculateCubeOrientationChange(
-        startFace: cube.visibleFace,
-        endFace: newVisibleFace,
-      );
+      newOrientation = cube.orientation +
+          calculateCubeOrientationChange(
+            startFace: cube.visibleFace,
+            endFace: newVisibleFace,
+          );
       break;
+    case MovementDirection.none:
+    newVisibleFace = cube.visibleFace;
+    newOrientation = cube.orientation;
+     break;
   }
 
-  return Cube(visibleFace: newVisibleFace, orientation: newOrientation.normalized);
+  return Cube(
+    visibleFace: newVisibleFace,
+    orientation: newOrientation.normalized,
+  );
 }
 
 ///Returns the face that will be to the top in a given orientation
@@ -234,7 +245,11 @@ Face calculateCorrectedFaceToTop({
   required Angle orientation,
 }) {
   final intOrientation =
-      double.parse(orientation.normalized.toString()).toInt();
+      double.parse(
+    orientation.normalized
+        .toString()
+        .substring(0, orientation.normalized.toString().length - 1),
+  ).toInt();
 
   final faceRelationship = faceRelationships.firstWhere(
     (faceRelationship) => faceRelationship.visibleFace == visibleFace,
@@ -260,7 +275,11 @@ Face calculateCorrectedFaceToRight({
   required Angle orientation,
 }) {
   final intOrientation =
-      double.parse(orientation.normalized.toString()).toInt();
+      double.parse(
+    orientation.normalized
+        .toString()
+        .substring(0, orientation.normalized.toString().length - 1),
+  ).toInt();
 
   final faceRelationship = faceRelationships.firstWhere(
     (faceRelationship) => faceRelationship.visibleFace == visibleFace,
@@ -286,7 +305,11 @@ Face calculateCorrectedFaceToBottom({
   required Angle orientation,
 }) {
   final intOrientation =
-      double.parse(orientation.normalized.toString()).toInt();
+      double.parse(
+    orientation.normalized
+        .toString()
+        .substring(0, orientation.normalized.toString().length - 1),
+  ).toInt();
 
   final faceRelationship = faceRelationships.firstWhere(
     (faceRelationship) => faceRelationship.visibleFace == visibleFace,
@@ -311,10 +334,11 @@ Face calculateCorrectedFaceToLeft({
   required Face visibleFace,
   required Angle orientation,
 }) {
-  final intOrientation = double.parse(orientation.normalized
-          .toString()
-          .substring(0, orientation.normalized.toString().length - 1))
-      .toInt();
+  final intOrientation = double.parse(
+    orientation.normalized
+        .toString()
+        .substring(0, orientation.normalized.toString().length - 1),
+  ).toInt();
 
   final faceRelationship = faceRelationships.firstWhere(
     (faceRelationship) => faceRelationship.visibleFace == visibleFace,

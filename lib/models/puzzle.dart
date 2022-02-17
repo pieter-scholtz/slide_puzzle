@@ -195,20 +195,40 @@ class Puzzle extends Equatable {
       final whitespaceTile = getWhitespaceTile();
       final whitespaceTileIndex = tiles.indexOf(whitespaceTile);
 
+      //Calculate the movement direction of a given tile
+      MovementDirection calculateDirection(Tile tile) {
+        if (tile.currentPosition.x > tile.previousPosition!.x) {
+          return MovementDirection.right;
+        } else if (tile.currentPosition.x < tile.previousPosition!.x) {
+          return MovementDirection.left;
+        } else if (tile.currentPosition.y > tile.previousPosition!.y) {
+          return MovementDirection.up;
+        } else if (tile.currentPosition.y < tile.previousPosition!.y) {
+          return MovementDirection.down;
+        } else {
+          return MovementDirection.none;
+        }
+      }
+
       // Swap current board positions of the moving tile and the whitespace.
 
-      final newCube =rollCube(
-          cube: tile.cube,
-          movementDirection: MovementDirection.right,
-        );
 
-      tiles[tileIndex] = tile.copyWith(
-        currentPosition: whitespaceTile.currentPosition,
-        cube: newCube,
+      final updatedTile = tile.copyWith(
+        updatedCurrentPosition: whitespaceTile.currentPosition,
+        updatedPreviousPosition: tile.currentPosition,
       );
+
+      final updatedCube = rollCube(
+        cube: tile.cube!,
+        movementDirection: calculateDirection(updatedTile),
+      );
+
+      tiles[tileIndex] = updatedTile.copyWith(
+        updatedCube: updatedCube,
+      );
+
       tiles[whitespaceTileIndex] = whitespaceTile.copyWith(
-        currentPosition: tile.currentPosition,
-        cube:tile.cube,
+        updatedCurrentPosition: tile.currentPosition,
       );
     }
 

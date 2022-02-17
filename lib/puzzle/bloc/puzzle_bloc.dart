@@ -149,7 +149,6 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         if (i == size * size)
           Tile(
             value: i,
-            cube: const Cube(visibleFace: Face.A,orientation: Angle.degrees(0)),
             correctPosition: whitespacePosition,
             currentPosition: currentPositions[i - 1],
             isWhitespace: true,
@@ -158,6 +157,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
           Tile(
             value: i,
             cube: const Cube(visibleFace: Face.A,orientation: Angle.degrees(0)),
+            previousPosition: currentPositions[i - 1],
             correctPosition: correctPositions[i - 1],
             currentPosition: currentPositions[i - 1],
           )

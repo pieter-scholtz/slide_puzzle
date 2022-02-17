@@ -15,5 +15,4 @@ class Cube {
   ///Current of the visible side (or the cube , since are at 0 degrees if the 
   ///cube is flattened)
   final Angle orientation;
-
 }

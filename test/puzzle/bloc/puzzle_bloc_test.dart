@@ -58,15 +58,15 @@ void main() {
 
   final puzzleSize3Unshuffled = Puzzle(
     tiles: [
-      size3Tile1.copyWith(currentPosition: size3Tile1.correctPosition),
-      size3Tile2.copyWith(currentPosition: size3Tile2.correctPosition),
-      size3Tile3.copyWith(currentPosition: size3Tile3.correctPosition),
-      size3Tile4.copyWith(currentPosition: size3Tile4.correctPosition),
-      size3Tile5.copyWith(currentPosition: size3Tile5.correctPosition),
-      size3Tile6.copyWith(currentPosition: size3Tile6.correctPosition),
-      size3Tile7.copyWith(currentPosition: size3Tile7.correctPosition),
-      size3Tile8.copyWith(currentPosition: size3Tile8.correctPosition),
-      size3Tile9.copyWith(currentPosition: size3Tile9.correctPosition),
+      size3Tile1.copyWith(updatedCurrentPosition: size3Tile1.correctPosition),
+      size3Tile2.copyWith(updatedCurrentPosition: size3Tile2.correctPosition),
+      size3Tile3.copyWith(updatedCurrentPosition: size3Tile3.correctPosition),
+      size3Tile4.copyWith(updatedCurrentPosition: size3Tile4.correctPosition),
+      size3Tile5.copyWith(updatedCurrentPosition: size3Tile5.correctPosition),
+      size3Tile6.copyWith(updatedCurrentPosition: size3Tile6.correctPosition),
+      size3Tile7.copyWith(updatedCurrentPosition: size3Tile7.correctPosition),
+      size3Tile8.copyWith(updatedCurrentPosition: size3Tile8.correctPosition),
+      size3Tile9.copyWith(updatedCurrentPosition: size3Tile9.correctPosition),
     ],
   );
 

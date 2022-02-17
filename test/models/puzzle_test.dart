@@ -361,12 +361,12 @@ void main() {
         final newPuzzle = Puzzle(
           tiles: [
             solvable2x2Tile0.copyWith(
-              currentPosition: solvable2x2Tile3.currentPosition,
+              updatedCurrentPosition: solvable2x2Tile3.currentPosition,
             ),
             solvable2x2Tile1,
             solvable2x2Tile2,
             solvable2x2Tile3.copyWith(
-              currentPosition: solvable2x2Tile0.currentPosition,
+              updatedCurrentPosition: solvable2x2Tile0.currentPosition,
             ),
           ],
         );
@@ -384,17 +384,17 @@ void main() {
         final newPuzzle = Puzzle(
           tiles: [
             unsolvable3x3Tile0.copyWith(
-              currentPosition: unsolvable3x3Tile3.currentPosition,
+              updatedCurrentPosition: unsolvable3x3Tile3.currentPosition,
             ),
             unsolvable3x3Tile1,
             unsolvable3x3Tile2,
             unsolvable3x3Tile3.copyWith(
-              currentPosition: unsolvable3x3Tile6.currentPosition,
+              updatedCurrentPosition: unsolvable3x3Tile6.currentPosition,
             ),
             unsolvable3x3Tile4,
             unsolvable3x3Tile5,
             unsolvable3x3Tile6.copyWith(
-              currentPosition: unsolvable3x3Tile0.currentPosition,
+              updatedCurrentPosition: unsolvable3x3Tile0.currentPosition,
             ),
             unsolvable3x3Tile7,
             unsolvable3x3Tile8,

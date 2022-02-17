@@ -136,9 +136,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
   @override
   Widget tileBuilder(Tile tile, PuzzleState state) {
     return CubePuzzleTile(
-        //key: Key('simple_puzzle_tile_${tile.value}_small'),
         tile: tile,
-        //tileFontSize: _TileFontSize.small,
         state: state,
       );
   }
@@ -267,21 +265,9 @@ class SimplePuzzleBoard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      // padding: EdgeInsets.zero,
-      // shrinkWrap: true,
-      // physics: const NeverScrollableScrollPhysics(),
-      // crossAxisCount: size,
-      // mainAxisSpacing: spacing,
-      // crossAxisSpacing: spacing,
       children: tiles,
     );
   }
-}
-
-abstract class _TileFontSize {
-  static double small = 36;
-  static double medium = 50;
-  static double large = 54;
 }
 
 /// {@template simple_puzzle_tile}
@@ -312,7 +298,7 @@ class SimplePuzzleTile extends StatelessWidget {
     final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
 
     return AnimatedSlide(
-      offset: Offset(0, 0),
+      offset: const Offset(0, 0),
       duration: const Duration(milliseconds: 100),
       child: TextButton(
         style: TextButton.styleFrom(
