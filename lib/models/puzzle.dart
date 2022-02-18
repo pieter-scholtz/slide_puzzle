@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:very_good_slide_puzzle/models/cube.dart';
 import 'package:very_good_slide_puzzle/models/cube_movement.dart';
+import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 
 // A 3x3 puzzle board visualization:
@@ -73,7 +74,9 @@ class Puzzle extends Equatable {
     var numberOfCorrectTiles = 0;
     for (final tile in tiles) {
       if (tile != whitespaceTile) {
-        if (tile.currentPosition == tile.correctPosition) {
+        if (faceValues[tile.value][tile.cube!.visibleFace.index] ==
+            correctFaceValues[tile.currentPosition.y - 1]
+                [tile.currentPosition.x - 1]) {
           numberOfCorrectTiles++;
         }
       }
@@ -211,7 +214,6 @@ class Puzzle extends Equatable {
       }
 
       // Swap current board positions of the moving tile and the whitespace.
-
 
       final updatedTile = tile.copyWith(
         updatedCurrentPosition: whitespaceTile.currentPosition,

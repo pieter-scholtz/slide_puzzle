@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:very_good_slide_puzzle/colors/colors.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
 import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
+import 'package:very_good_slide_puzzle/theme/bloc/theme_bloc.dart';
 import 'package:very_good_slide_puzzle/typography/text_styles.dart';
 
 abstract class _TileSize {
@@ -157,7 +159,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
           faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
 
       if (widget.tile.currentPosition.x > oldWidget.tile.currentPosition.x) {
-        print(widget.tile.value.toString() + "movedRight");
+//        print(widget.tile.value.toString() + "movedRight");
 
         _face1PositionAlignment = Alignment.centerLeft;
 
@@ -183,7 +185,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       }
 
       if (widget.tile.currentPosition.x < oldWidget.tile.currentPosition.x) {
-        print(widget.tile.value.toString() + "movedLeft");
+//        print(widget.tile.value.toString() + "movedLeft");
 
         _face1PositionAlignment = Alignment.centerRight;
 
@@ -209,7 +211,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       }
 
       if (widget.tile.currentPosition.y > oldWidget.tile.currentPosition.y) {
-        print(widget.tile.value.toString() + "movedDown");
+//        print(widget.tile.value.toString() + "movedDown");
 
         _face1PositionAlignment = Alignment.topCenter;
 
@@ -235,7 +237,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       }
 
       if (widget.tile.currentPosition.y < oldWidget.tile.currentPosition.y) {
-        print(widget.tile.value.toString() + "movedUp");
+//        print(widget.tile.value.toString() + "movedUp");
 
         _face1PositionAlignment = Alignment.bottomCenter;
 
@@ -260,8 +262,8 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         _movementController.forward();
       }
 
-      print(
-          "Visible value :${faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index]}");
+      // print(
+      //     "Visible value :${faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index]}");
     }
 
     super.didUpdateWidget(widget);
@@ -334,6 +336,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
                       child: CubeFace(
                           text: _face1Value.toString(),
                           tile: widget.tile,
+                          state:widget.state,
                           onPressed: () {
                             if (canPress) {
                               context
@@ -354,6 +357,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
                       child: CubeFace(
                           text: _face2Value.toString(),
                           tile: widget.tile,
+                           state:widget.state,
                           onPressed: () {
                             if (canPress) {
                               context
@@ -378,6 +382,7 @@ class CubeFace extends StatelessWidget {
     Key? key,
     required this.text,
     required this.tile,
+    required this.state,
     required this.onPressed,
   }) : super(key: key);
 
@@ -385,24 +390,37 @@ class CubeFace extends StatelessWidget {
 
   final Tile tile;
 
+    /// The state of the puzzle.
+  final PuzzleState state;
+
   final Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
     return TextButton(
       style: TextButton.styleFrom(
-        backgroundColor: Colors.blueGrey,
-        textStyle: PuzzleTextStyle.headline2.copyWith(),
+        primary: PuzzleColors.white,
+        textStyle: PuzzleTextStyle.headline2.copyWith(color: Colors.black),
         shape: const RoundedRectangleBorder(
-          side: BorderSide(
-            color: Colors.blue,
-            width: 20,
-          ),
           borderRadius: BorderRadius.all(
             Radius.circular(12),
           ),
         ),
-      ),
+      ).copyWith(
+          foregroundColor: MaterialStateProperty.all(PuzzleColors.white),
+          backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+            (states) {
+              if (tile.value == state.lastTappedTile?.value) {
+                return theme.pressedColor;
+              } else if (states.contains(MaterialState.hovered)) {
+                return theme.hoverColor;
+              } else {
+                return theme.defaultColor;
+              }
+            },
+          ),
+        ),
       onPressed: onPressed,
       child: Text(
         text,
