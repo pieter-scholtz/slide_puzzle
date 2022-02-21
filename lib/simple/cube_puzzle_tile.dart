@@ -49,38 +49,32 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   late AnimationController _movementController;
 
-  //late AnimationController _face1YRotationController;
 
   late Animation<double> _face1YRotation =
       Tween<double>(begin: 0, end: 0).animate(
     _movementController,
   );
 
-  //late AnimationController _face2YRotationController;
   late Animation<double> _face2YRotation =
       Tween<double>(begin: 0, end: 0).animate(
     _movementController,
   );
 
-  //late AnimationController _face1XRotationController;
   late Animation<double> _face1XRotation =
       Tween<double>(begin: 0, end: 0).animate(
     _movementController,
   );
 
-  //late AnimationController _face2XRotationController;
   late Animation<double> _face2XRotation =
       Tween<double>(begin: 0, end: 0).animate(
     _movementController,
   );
 
-  //late AnimationController _face1PositionController;
   late Animation<Offset> _face1Position = Tween<Offset>(
     begin: Offset.zero,
     end: Offset.zero,
   ).animate(_movementController);
 
-  //late AnimationController _face2Position2Controller;
   late Animation<Offset> _face2Position = Tween<Offset>(
     begin: Offset.zero,
     end: Offset.zero,
@@ -271,6 +265,8 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   @override
   void dispose() {
+    _movementController.dispose();
+    _scaleController.dispose();
     super.dispose();
   }
 

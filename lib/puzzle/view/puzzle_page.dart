@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
-import 'package:very_good_slide_puzzle/audio_control/audio_control.dart';
-import 'package:very_good_slide_puzzle/dashatar/dashatar.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
@@ -26,26 +24,10 @@ class PuzzlePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => DashatarThemeBloc(
-            themes: const [
-              BlueDashatarTheme(),
-              GreenDashatarTheme(),
-              YellowDashatarTheme()
-            ],
-          ),
-        ),
-        BlocProvider(
-          create: (_) => DashatarPuzzleBloc(
-            secondsToBegin: 3,
-            ticker: const Ticker(),
-          ),
-        ),
-        BlocProvider(
+                BlocProvider(
           create: (context) => ThemeBloc(
             initialThemes: [
               const SimpleTheme(),
-              context.read<DashatarThemeBloc>().state.theme,
             ],
           ),
         ),
@@ -53,9 +35,6 @@ class PuzzlePage extends StatelessWidget {
           create: (_) => TimerBloc(
             ticker: const Ticker(),
           ),
-        ),
-        BlocProvider(
-          create: (_) => AudioControlBloc(),
         ),
       ],
       child: const PuzzleView(),
@@ -81,12 +60,7 @@ class PuzzleView extends StatelessWidget {
       body: AnimatedContainer(
         duration: PuzzleThemeAnimationDuration.backgroundColorChange,
         decoration: BoxDecoration(color: theme.backgroundColor),
-        child: BlocListener<DashatarThemeBloc, DashatarThemeState>(
-          listener: (context, state) {
-            final dashatarTheme = context.read<DashatarThemeBloc>().state.theme;
-            context.read<ThemeBloc>().add(ThemeUpdated(theme: dashatarTheme));
-          },
-          child: MultiBlocProvider(
+        child: MultiBlocProvider(
             providers: [
               BlocProvider(
                 create: (context) => TimerBloc(
@@ -107,7 +81,6 @@ class PuzzleView extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -165,13 +138,6 @@ class PuzzleHeader extends StatelessWidget {
           children: [
             const Align(
               child: PuzzleLogo(),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 34),
-                child: AudioControl(key: audioControlKey),
-              ),
             ),
           ],
         ),
@@ -356,9 +322,6 @@ class PuzzleMenu extends StatelessWidget {
             return Row(
               children: [
                 const Gap(44),
-                AudioControl(
-                  key: audioControlKey,
-                )
               ],
             );
           },
@@ -443,11 +406,6 @@ class PuzzleMenuItem extends StatelessWidget {
 
                 // Reset the timer of the currently running puzzle.
                 context.read<TimerBloc>().add(const TimerReset());
-
-                // Stop the Dashatar countdown if it has been started.
-                context.read<DashatarPuzzleBloc>().add(
-                      const DashatarCountdownStopped(),
-                    );
 
                 // Initialize the puzzle board for the newly selected theme.
                 context.read<PuzzleBloc>().add(

@@ -1,7 +1,5 @@
-import 'package:angles/angles.dart';
 import 'package:equatable/equatable.dart';
 import 'package:very_good_slide_puzzle/models/cube.dart';
-import 'package:very_good_slide_puzzle/models/cube_faces.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 
 /// {@template tile}
