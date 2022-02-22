@@ -18,12 +18,12 @@ abstract class _TileSize {
   static double large = 112;
 }
 
-/// {@template dashatar_puzzle_tile}
+/// {@template cube_puzzle_tile}
 /// Displays the puzzle tile associated with [tile]
 /// based on the puzzle [state].
 /// {@endtemplate}
 class CubePuzzleTile extends StatefulWidget {
-  /// {@macro dashatar_puzzle_tile}
+  /// {@macro cube_puzzle_tile}
   const CubePuzzleTile({
     Key? key,
     required this.tile,
@@ -52,8 +52,8 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   late MovementDirection movementDirection = MovementDirection.none;
 
-  final rotationCurve = Curves.linear;
-  final positionCurve = Curves.easeInSine;
+  final rotationCurve = const Interval(0.2, 0.9, curve: Curves.linear);//Curves.linear;
+  final positionCurve = const Interval(0.2, 0.9, curve: Curves.linear);//Curves.easeInSine;
 
   late Animation<double> _face1YRotation =
       Tween<double>(begin: 0, end: 0).animate(
@@ -177,7 +177,6 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
           faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
 
       if (widget.tile.currentPosition.x > oldWidget.tile.currentPosition.x) {
-//        print(widget.tile.value.toString() + "movedRight");
         movementDirection = MovementDirection.right;
 
         _face1PositionAlignment = Alignment.centerLeft;
@@ -224,7 +223,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         _face2PositionAlignment = Alignment.centerLeft;
 
         _face1YRotation = Tween<double>(begin: 0, end: pi / 2).animate(
-          movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2YRotation = Tween<double>(begin: -pi / 2, end: 0).animate(
@@ -482,19 +484,19 @@ class CubeFace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
-    Radius topLeft = Radius.circular(12);
-    Radius topRight = Radius.circular(12);
-    Radius bottomLeft = Radius.circular(12);
-    Radius bottomRight = Radius.circular(12);
+    Radius topLeft = const Radius.circular(12);
+    Radius topRight = const Radius.circular(12);
+    Radius bottomLeft = const Radius.circular(12);
+    Radius bottomRight = const  Radius.circular(12);
 
-    if ( movementController.value < 0.9) {
+    if (movementController.value < 0.75) {
       switch (movementDirection) {
         case MovementDirection.right:
         print('Right');
-          topRight = is1 ? Radius.circular(12) : Radius.zero;
+          topRight = is1 ? const Radius.circular(12) : Radius.zero;
           bottomRight = is1 ? Radius.circular(12) : Radius.zero;
-          topLeft = is1 ? Radius.zero : Radius.circular(12);
-          bottomLeft = is1 ? Radius.zero : Radius.circular(12);
+          topLeft = is1 ? Radius.zero : const Radius.circular(12);
+          bottomLeft = is1 ? Radius.zero : const Radius.circular(12);
           break;
         case MovementDirection.down:
           topRight = Radius.zero;
@@ -503,10 +505,10 @@ class CubeFace extends StatelessWidget {
           bottomLeft = Radius.zero;
           break;
         case MovementDirection.left:
-          topRight = Radius.zero;
-          bottomRight = Radius.zero;
-          topLeft = Radius.zero;
-          bottomLeft = Radius.zero;
+          topLeft = is1 ? const Radius.circular(12) : Radius.zero;
+          bottomLeft = is1 ? const Radius.circular(12) : Radius.zero;
+          topRight = is1 ? Radius.zero : const Radius.circular(12);
+          bottomRight = is1 ? Radius.zero : const Radius.circular(12);
           break;
         case MovementDirection.up:
           topRight = Radius.zero;
