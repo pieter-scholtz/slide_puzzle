@@ -31,25 +31,6 @@ class _AppState extends State<App> {
   /// The path to local assets folder.
   static const localAssetsPrefix = 'assets/';
 
-  static final audioControlAssets = [
-    'assets/images/audio_control/simple_on.png',
-    'assets/images/audio_control/simple_off.png',
-    'assets/images/audio_control/dashatar_on.png',
-    'assets/images/audio_control/green_dashatar_off.png',
-    'assets/images/audio_control/blue_dashatar_off.png',
-    'assets/images/audio_control/yellow_dashatar_off.png',
-  ];
-
-  static final audioAssets = [
-    'assets/audio/shuffle.mp3',
-    'assets/audio/click.mp3',
-    'assets/audio/dumbbell.mp3',
-    'assets/audio/sandwich.mp3',
-    'assets/audio/skateboard.mp3',
-    'assets/audio/success.mp3',
-    'assets/audio/tile_move.mp3',
-  ];
-
   late final PlatformHelper _platformHelper;
   late final Timer _timer;
 
@@ -60,44 +41,6 @@ class _AppState extends State<App> {
     _platformHelper = widget._platformHelperFactory();
 
     _timer = Timer(const Duration(milliseconds: 20), () {
-      for (var i = 1; i <= 15; i++) {
-        precacheImage(
-          Image.asset('assets/images/dashatar/green/$i.png').image,
-          context,
-        );
-        precacheImage(
-          Image.asset('assets/images/dashatar/blue/$i.png').image,
-          context,
-        );
-        precacheImage(
-          Image.asset('assets/images/dashatar/yellow/$i.png').image,
-          context,
-        );
-      }
-      precacheImage(
-        Image.asset('assets/images/dashatar/gallery/green.png').image,
-        context,
-      );
-      precacheImage(
-        Image.asset('assets/images/dashatar/success/green.png').image,
-        context,
-      );
-      precacheImage(
-        Image.asset('assets/images/dashatar/gallery/blue.png').image,
-        context,
-      );
-      precacheImage(
-        Image.asset('assets/images/dashatar/success/blue.png').image,
-        context,
-      );
-      precacheImage(
-        Image.asset('assets/images/dashatar/gallery/yellow.png').image,
-        context,
-      );
-      precacheImage(
-        Image.asset('assets/images/dashatar/success/yellow.png').image,
-        context,
-      );
       precacheImage(
         Image.asset('assets/images/logo_flutter_color.png').image,
         context,
@@ -134,17 +77,6 @@ class _AppState extends State<App> {
         Image.asset('assets/images/facebook_icon.png').image,
         context,
       );
-
-      for (final audioControlAsset in audioControlAssets) {
-        precacheImage(
-          Image.asset(audioControlAsset).image,
-          context,
-        );
-      }
-
-      // for (final audioAsset in audioAssets) {
-      //   prefetchToMemory(audioAsset);
-      // }
     });
   }
 
