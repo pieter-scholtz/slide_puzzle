@@ -108,7 +108,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
 
     if (shuffle) {
       // Randomize only the current tile posistions.
-      currentPositions.shuffle(random);
+      //currentPositions.shuffle(random);
     }
 
     var tiles = _getTileListFromPositions(
@@ -122,15 +122,16 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     if (shuffle) {
       // Assign the tiles new current positions until the puzzle is solvable and
       // zero tiles are in their correct position.
-      while (!puzzle.isSolvable() || puzzle.getNumberOfCorrectTiles() != 0) {
-        currentPositions.shuffle(random);
-        tiles = _getTileListFromPositions(
-          size,
-          correctPositions,
-          currentPositions,
-        );
-        puzzle = Puzzle(tiles: tiles);
-      }
+      // while (!puzzle.isSolvable() || puzzle.getNumberOfCorrectTiles() != 0) {
+      //   currentPositions.shuffle(random);
+      //   tiles = _getTileListFromPositions(
+      //     size,
+      //     correctPositions,
+      //     currentPositions,
+      //   );
+      //   puzzle = Puzzle(tiles: tiles);
+      // }
+      //puzzle = Puzzle(tiles: tiles);
     }
 
     return puzzle;

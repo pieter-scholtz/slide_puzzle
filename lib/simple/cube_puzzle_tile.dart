@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:very_good_slide_puzzle/colors/colors.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
+import 'package:very_good_slide_puzzle/models/cube_movement.dart';
 import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
@@ -47,40 +48,56 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   late AnimationController _scaleController;
   late Animation<double> _scale;
 
-  late AnimationController _movementController;
+  late AnimationController movementController;
 
+  late MovementDirection movementDirection = MovementDirection.none;
+
+  final rotationCurve = Curves.linear;
+  final positionCurve = Curves.easeInSine;
 
   late Animation<double> _face1YRotation =
       Tween<double>(begin: 0, end: 0).animate(
-    _movementController,
+    CurvedAnimation(
+      parent: movementController,
+      curve: rotationCurve,
+    ),
   );
 
   late Animation<double> _face2YRotation =
       Tween<double>(begin: 0, end: 0).animate(
-    _movementController,
+    CurvedAnimation(
+      parent: movementController,
+      curve: rotationCurve,
+    ),
   );
 
   late Animation<double> _face1XRotation =
       Tween<double>(begin: 0, end: 0).animate(
-    _movementController,
+    CurvedAnimation(
+      parent: movementController,
+      curve: rotationCurve,
+    ),
   );
 
   late Animation<double> _face2XRotation =
       Tween<double>(begin: 0, end: 0).animate(
-    _movementController,
+    CurvedAnimation(
+      parent: movementController,
+      curve: rotationCurve,
+    ),
   );
 
   late Animation<Offset> _face1Position = Tween<Offset>(
     begin: Offset.zero,
     end: Offset.zero,
-  ).animate(_movementController);
+  ).animate(movementController);
 
   late Animation<Offset> _face2Position = Tween<Offset>(
     begin: Offset.zero,
     end: Offset.zero,
-  ).animate(_movementController);
+  ).animate(movementController);
 
-  final Duration _movementDuration = const Duration(milliseconds: 400);
+  final Duration _movementDuration = const Duration(milliseconds: 444);
 
   late int _face1Value =
       faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
@@ -101,14 +118,14 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       duration: _movementDuration,
     );
 
-    _scale = Tween<double>(begin: 1, end: 1.1).animate(
+    _scale = Tween<double>(begin: 1, end: 1).animate(
       CurvedAnimation(
         parent: _scaleController,
         curve: const Interval(0, 1, curve: Curves.easeInOut),
       ),
     );
 
-    _movementController = AnimationController(
+    movementController = AnimationController(
       vsync: this,
       duration: _movementDuration,
     );
@@ -116,9 +133,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   @override
   void didUpdateWidget(CubePuzzleTile oldWidget) {
+    movementDirection = MovementDirection.none;
     if (!((widget.tile.currentPosition.x == oldWidget.tile.currentPosition.x) &&
         (widget.tile.currentPosition.y == oldWidget.tile.currentPosition.y))) {
-      _movementController.reset();
+      movementController.reset();
 
       _face1Position = Tween<Offset>(
         begin: Offset.zero,
@@ -129,7 +147,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
               .toDouble(),
         ),
       ).animate(
-        _movementController,
+        CurvedAnimation(
+          parent: movementController,
+          curve: positionCurve,
+        ),
       );
 
       _face2Position = Tween<Offset>(
@@ -143,7 +164,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         ),
         end: Offset.zero,
       ).animate(
-        _movementController,
+        CurvedAnimation(
+          parent: movementController,
+          curve: positionCurve,
+        ),
       );
 
       _face1Value = faceValues[oldWidget.tile.value]
@@ -154,106 +178,155 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
       if (widget.tile.currentPosition.x > oldWidget.tile.currentPosition.x) {
 //        print(widget.tile.value.toString() + "movedRight");
+        movementDirection = MovementDirection.right;
 
         _face1PositionAlignment = Alignment.centerLeft;
 
         _face2PositionAlignment = Alignment.centerRight;
 
         _face1YRotation = Tween<double>(begin: 0, end: -pi / 2).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2YRotation = Tween<double>(begin: pi / 2, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face1XRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2XRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
-        _movementController.forward();
+        movementController.forward();
       }
 
       if (widget.tile.currentPosition.x < oldWidget.tile.currentPosition.x) {
 //        print(widget.tile.value.toString() + "movedLeft");
+        movementDirection = MovementDirection.left;
 
         _face1PositionAlignment = Alignment.centerRight;
 
         _face2PositionAlignment = Alignment.centerLeft;
 
         _face1YRotation = Tween<double>(begin: 0, end: pi / 2).animate(
-          _movementController,
+          movementController,
         );
 
         _face2YRotation = Tween<double>(begin: -pi / 2, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face1XRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2XRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
-        _movementController.forward();
+        movementController.forward();
       }
 
       if (widget.tile.currentPosition.y > oldWidget.tile.currentPosition.y) {
 //        print(widget.tile.value.toString() + "movedDown");
+        movementDirection = MovementDirection.down;
 
         _face1PositionAlignment = Alignment.topCenter;
 
         _face2PositionAlignment = Alignment.bottomCenter;
 
         _face1XRotation = Tween<double>(begin: 0, end: pi / 2).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2XRotation = Tween<double>(begin: -pi / 2, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face1YRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2YRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
-        _movementController.forward();
+        movementController.forward();
       }
 
       if (widget.tile.currentPosition.y < oldWidget.tile.currentPosition.y) {
 //        print(widget.tile.value.toString() + "movedUp");
+        movementDirection = MovementDirection.up;
 
         _face1PositionAlignment = Alignment.bottomCenter;
 
         _face2PositionAlignment = Alignment.topCenter;
 
         _face1XRotation = Tween<double>(begin: 0, end: -pi / 2).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2XRotation = Tween<double>(begin: pi / 2, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face1YRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
         _face2YRotation = Tween<double>(begin: 0, end: 0).animate(
-          _movementController,
+          CurvedAnimation(
+            parent: movementController,
+            curve: rotationCurve,
+          ),
         );
 
-        _movementController.forward();
+        movementController.forward();
       }
 
       // print(
@@ -265,7 +338,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   @override
   void dispose() {
-    _movementController.dispose();
+    movementController.dispose();
     _scaleController.dispose();
     super.dispose();
   }
@@ -330,9 +403,12 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
                         ..rotateY(_face1YRotation.value)
                         ..rotateX(_face1XRotation.value),
                       child: CubeFace(
+                          is1: true,
+                          movementController: movementController,
+                          movementDirection: movementDirection,
                           text: _face1Value.toString(),
                           tile: widget.tile,
-                          state:widget.state,
+                          state: widget.state,
                           onPressed: () {
                             if (canPress) {
                               context
@@ -351,9 +427,12 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
                         ..rotateY(_face2YRotation.value)
                         ..rotateX(_face2XRotation.value),
                       child: CubeFace(
+                          is1: false,
+                          movementController: movementController,
+                          movementDirection: movementDirection,
                           text: _face2Value.toString(),
                           tile: widget.tile,
-                           state:widget.state,
+                          state: widget.state,
                           onPressed: () {
                             if (canPress) {
                               context
@@ -374,49 +453,97 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 }
 
 class CubeFace extends StatelessWidget {
-  const CubeFace({
-    Key? key,
-    required this.text,
-    required this.tile,
-    required this.state,
-    required this.onPressed,
-  }) : super(key: key);
+  const CubeFace(
+      {Key? key,
+      required this.text,
+      required this.tile,
+      required this.state,
+      required this.onPressed,
+      required this.movementDirection,
+      required this.movementController,
+      required this.is1})
+      : super(key: key);
 
   final String text;
 
   final Tile tile;
 
-    /// The state of the puzzle.
+  /// The state of the puzzle.
   final PuzzleState state;
 
   final Function() onPressed;
 
+  final MovementDirection movementDirection;
+
+  final AnimationController movementController;
+
+  final bool is1;
+
   @override
   Widget build(BuildContext context) {
     final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
+    Radius topLeft = Radius.circular(12);
+    Radius topRight = Radius.circular(12);
+    Radius bottomLeft = Radius.circular(12);
+    Radius bottomRight = Radius.circular(12);
+
+    if ( movementController.value < 0.9) {
+      switch (movementDirection) {
+        case MovementDirection.right:
+        print('Right');
+          topRight = is1 ? Radius.circular(12) : Radius.zero;
+          bottomRight = is1 ? Radius.circular(12) : Radius.zero;
+          topLeft = is1 ? Radius.zero : Radius.circular(12);
+          bottomLeft = is1 ? Radius.zero : Radius.circular(12);
+          break;
+        case MovementDirection.down:
+          topRight = Radius.zero;
+          bottomRight = Radius.zero;
+          topLeft = Radius.zero;
+          bottomLeft = Radius.zero;
+          break;
+        case MovementDirection.left:
+          topRight = Radius.zero;
+          bottomRight = Radius.zero;
+          topLeft = Radius.zero;
+          bottomLeft = Radius.zero;
+          break;
+        case MovementDirection.up:
+          topRight = Radius.zero;
+          bottomRight = Radius.zero;
+          topLeft = Radius.zero;
+          bottomLeft = Radius.zero;
+          break;
+        default:
+          break;
+      }
+    }
     return TextButton(
       style: TextButton.styleFrom(
         primary: PuzzleColors.white,
-        textStyle: PuzzleTextStyle.headline2.copyWith(color: Colors.black),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(12),
-          ),
+        textStyle: PuzzleTextStyle.headline2
+            .copyWith(color: Colors.black, fontSize: 40),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: topLeft,
+              topRight: topRight,
+              bottomLeft: bottomLeft,
+              bottomRight: bottomRight),
         ),
       ).copyWith(
-          foregroundColor: MaterialStateProperty.all(PuzzleColors.white),
-          backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-            (states) {
-              if (tile.value == state.lastTappedTile?.value) {
-                return theme.pressedColor;
-              } else if (states.contains(MaterialState.hovered)) {
-                return theme.hoverColor;
-              } else {
-                return theme.defaultColor;
-              }
-            },
-          ),
+        foregroundColor: MaterialStateProperty.all(PuzzleColors.white),
+        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+          (states) {
+            if (tile.value == state.lastTappedTile?.value) {
+              return theme.pressedColor;
+            } else if (states.contains(MaterialState.hovered)) {
+              return theme.hoverColor;
+            } else {
+              return theme.defaultColor;
+            }
+          },
         ),
+      ),
       onPressed: onPressed,
       child: Text(
         text,

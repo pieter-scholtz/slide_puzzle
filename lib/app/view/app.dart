@@ -142,9 +142,9 @@ class _AppState extends State<App> {
         );
       }
 
-      for (final audioAsset in audioAssets) {
-        prefetchToMemory(audioAsset);
-      }
+      // for (final audioAsset in audioAssets) {
+      //   prefetchToMemory(audioAsset);
+      // }
     });
   }
 
