@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:very_good_slide_puzzle/colors/colors.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
+import 'package:very_good_slide_puzzle/models/cube.dart';
 import 'package:very_good_slide_puzzle/models/cube_movement.dart';
 import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
@@ -13,9 +14,9 @@ import 'package:very_good_slide_puzzle/theme/bloc/theme_bloc.dart';
 import 'package:very_good_slide_puzzle/typography/text_styles.dart';
 
 abstract class _TileSize {
-  static double small = 75;
-  static double medium = 100;
-  static double large = 112;
+  static double small = 73; //75;
+  static double medium = 103; //100;
+  static double large = 115; //112;
 }
 
 /// {@template cube_puzzle_tile}
@@ -52,11 +53,13 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   late MovementDirection movementDirection = MovementDirection.none;
 
-  final rotationCurve = const Interval(0.2, 0.9, curve: Curves.linear);//Curves.linear;
-  final positionCurve = const Interval(0.2, 0.9, curve: Curves.linear);//Curves.easeInSine;
+  final rotationCurve =
+      const Interval(0.2, 0.8, curve: Curves.linear); //Curves.linear; //
+  final positionCurve =
+      const Interval(0.2, 0.8, curve: Curves.easeOut); //Curves.easeOut; //
 
   late Animation<double> _face1YRotation =
-      Tween<double>(begin: 0, end: 0).animate(
+      Tween<double>(begin: 0, end: 1).animate(
     CurvedAnimation(
       parent: movementController,
       curve: rotationCurve,
@@ -64,7 +67,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   );
 
   late Animation<double> _face2YRotation =
-      Tween<double>(begin: 0, end: 0).animate(
+      Tween<double>(begin: 0, end: 1).animate(
     CurvedAnimation(
       parent: movementController,
       curve: rotationCurve,
@@ -72,7 +75,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   );
 
   late Animation<double> _face1XRotation =
-      Tween<double>(begin: 0, end: 0).animate(
+      Tween<double>(begin: 0, end: 1).animate(
     CurvedAnimation(
       parent: movementController,
       curve: rotationCurve,
@@ -80,7 +83,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   );
 
   late Animation<double> _face2XRotation =
-      Tween<double>(begin: 0, end: 0).animate(
+      Tween<double>(begin: 0, end: 1).animate(
     CurvedAnimation(
       parent: movementController,
       curve: rotationCurve,
@@ -97,21 +100,32 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
     end: Offset.zero,
   ).animate(movementController);
 
-  final Duration _movementDuration = const Duration(milliseconds: 444);
+  final Duration _movementDuration = const Duration(milliseconds: 555);
 
-  late int _face1Value =
-      faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
+  late Color _face1Color =
+      faceColors[widget.tile.value][widget.tile.cube!.visibleFace.index];
 
-  late int _face2Value =
-      faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
+  late Color _face2color =
+      faceColors[widget.tile.value][widget.tile.cube!.visibleFace.index];
 
   late AlignmentGeometry _face1PositionAlignment = Alignment.center;
 
   late AlignmentGeometry _face2PositionAlignment = Alignment.center;
 
+  late bool isNextToWhitespace = false;
+
+  late bool needsToMove = false;
+
+  late bool isAnimating = false;
+
   @override
   void initState() {
     super.initState();
+
+    movementController = AnimationController(
+      vsync: this,
+      duration: _movementDuration,
+    );
 
     _scaleController = AnimationController(
       vsync: this,
@@ -125,26 +139,88 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       ),
     );
 
-    movementController = AnimationController(
-      vsync: this,
-      duration: _movementDuration,
-    );
+    if (isNextToWhitespace) {
+      needsToMove = true;
+    } else {
+      needsToMove = false;
+    }
+
+    calculateAnimantionValues(
+        widget.state.puzzle.tiles
+            .firstWhere((tile) => tile.isWhitespace)
+            .currentPosition,
+        widget.tile.currentPosition,
+        widget.tile.cube!);
   }
 
   @override
   void didUpdateWidget(CubePuzzleTile oldWidget) {
     movementDirection = MovementDirection.none;
-    if (!((widget.tile.currentPosition.x == oldWidget.tile.currentPosition.x) &&
-        (widget.tile.currentPosition.y == oldWidget.tile.currentPosition.y))) {
-      movementController.reset();
 
+    print(widget.tile.value.toString() + "didUpdate");
+
+    Tile whitespaceTile =
+        widget.state.puzzle.tiles.firstWhere((tile) => tile.isWhitespace);
+
+    Tile previousWhitespaceTile =
+        oldWidget.state.puzzle.tiles.firstWhere((tile) => tile.isWhitespace);
+
+    Position whitespacePosition = whitespaceTile.currentPosition;
+
+    Position previousWhitespacePosition =
+        previousWhitespaceTile.currentPosition;
+
+    Position currentPosition = widget.tile.currentPosition;
+
+    isNextToWhitespace =
+        (((currentPosition.x - whitespacePosition.x).abs() == 1) &&
+                ((currentPosition.y - whitespacePosition.y).abs() == 0)) ||
+            (((currentPosition.y - whitespacePosition.y).abs() == 1) &&
+                ((currentPosition.x - whitespacePosition.x).abs() == 0));
+
+    if (!((currentPosition.x == oldWidget.tile.currentPosition.x) &&
+        (currentPosition.y == oldWidget.tile.currentPosition.y))) {
+      needsToMove = true;
+    }
+
+    if (!needsToMove) {
+      calculateAnimantionValues(
+          whitespacePosition, widget.tile.currentPosition, widget.tile.cube!);
+    }
+
+    if (needsToMove) {
+      isAnimating = true;
+      movementController.forward().whenComplete(() {
+        calculateAnimantionValues(
+            whitespacePosition, widget.tile.currentPosition, widget.tile.cube!);
+        movementController.reset();
+        isAnimating = false;
+      });
+      needsToMove = false;
+    }
+
+    super.didUpdateWidget(widget);
+  }
+
+  void calculateAnimantionValues(
+      Position whitespacePosition, Position currentPosition, Cube cube) {
+    //print("refresh");
+
+    isNextToWhitespace =
+        (((currentPosition.x - whitespacePosition.x).abs() == 1) &&
+                ((currentPosition.y - whitespacePosition.y).abs() == 0)) ||
+            (((currentPosition.y - whitespacePosition.y).abs() == 1) &&
+                ((currentPosition.x - whitespacePosition.x).abs() == 0));
+
+    // if (!((whitespacePosition.x == currentPosition.x) &&
+    //     (whitespacePosition.y == currentPosition.y))) {
+
+    if (isNextToWhitespace) {
       _face1Position = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
-          (widget.tile.currentPosition.x - widget.tile.previousPosition!.x)
-              .toDouble(),
-          (widget.tile.currentPosition.y - widget.tile.previousPosition!.y)
-              .toDouble(),
+          (whitespacePosition.x - currentPosition.x).toDouble(),
+          (whitespacePosition.y - currentPosition.y).toDouble(),
         ),
       ).animate(
         CurvedAnimation(
@@ -155,12 +231,8 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
       _face2Position = Tween<Offset>(
         begin: Offset(
-          (widget.tile.currentPosition.x - widget.tile.previousPosition!.x)
-                  .toDouble() *
-              -1,
-          (widget.tile.currentPosition.y - widget.tile.previousPosition!.y)
-                  .toDouble() *
-              -1,
+          (whitespacePosition.x - currentPosition.x).toDouble() * -1,
+          (whitespacePosition.y - currentPosition.y).toDouble() * -1,
         ),
         end: Offset.zero,
       ).animate(
@@ -170,13 +242,8 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         ),
       );
 
-      _face1Value = faceValues[oldWidget.tile.value]
-          [oldWidget.tile.cube!.visibleFace.index];
-
-      _face2Value =
-          faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index];
-
-      if (widget.tile.currentPosition.x > oldWidget.tile.currentPosition.x) {
+      if (whitespacePosition.x > currentPosition.x) {
+        print(widget.tile.value.toString() + "can move right");
         movementDirection = MovementDirection.right;
 
         _face1PositionAlignment = Alignment.centerLeft;
@@ -210,12 +277,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
             curve: rotationCurve,
           ),
         );
-
-        movementController.forward();
       }
 
-      if (widget.tile.currentPosition.x < oldWidget.tile.currentPosition.x) {
-//        print(widget.tile.value.toString() + "movedLeft");
+      if (whitespacePosition.x < currentPosition.x) {
+        print(widget.tile.value.toString() + "can move left");
         movementDirection = MovementDirection.left;
 
         _face1PositionAlignment = Alignment.centerRight;
@@ -249,12 +314,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
             curve: rotationCurve,
           ),
         );
-
-        movementController.forward();
       }
 
-      if (widget.tile.currentPosition.y > oldWidget.tile.currentPosition.y) {
-//        print(widget.tile.value.toString() + "movedDown");
+      if (whitespacePosition.y > currentPosition.y) {
+        print(widget.tile.value.toString() + "can move down");
         movementDirection = MovementDirection.down;
 
         _face1PositionAlignment = Alignment.topCenter;
@@ -288,12 +351,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
             curve: rotationCurve,
           ),
         );
-
-        movementController.forward();
       }
 
-      if (widget.tile.currentPosition.y < oldWidget.tile.currentPosition.y) {
-//        print(widget.tile.value.toString() + "movedUp");
+      if (whitespacePosition.y < currentPosition.y) {
+        print(widget.tile.value.toString() + "can move up");
         movementDirection = MovementDirection.up;
 
         _face1PositionAlignment = Alignment.bottomCenter;
@@ -327,15 +388,15 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
             curve: rotationCurve,
           ),
         );
-
-        movementController.forward();
       }
 
-      // print(
-      //     "Visible value :${faceValues[widget.tile.value][widget.tile.cube!.visibleFace.index]}");
-    }
+      _face1Color = faceColors[widget.tile.value][cube.visibleFace.index];
 
-    super.didUpdateWidget(widget);
+      Cube rolledcube = rollCube(
+          cube: widget.tile.cube!, movementDirection: movementDirection);
+
+      _face2color = faceColors[widget.tile.value][rolledcube.visibleFace.index];
+    }
   }
 
   @override
@@ -352,99 +413,104 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         context.select((PuzzleBloc bloc) => bloc.state.puzzleStatus) ==
             PuzzleStatus.incomplete;
 
+    //isAnimating = movementController.value != 0 && movementController.value != 1;
+
     final canPress = puzzleIncomplete;
 
-    return AnimatedAlign(
-      alignment: FractionalOffset(
-        (widget.tile.currentPosition.x - 1) / (size - 1),
-        (widget.tile.currentPosition.y - 1) / (size - 1),
-      ),
-      duration: _movementDuration,
-      curve: Curves.easeInOut,
-      child: ResponsiveLayoutBuilder(
-        small: (_, child) => SizedBox.square(
-          key: Key('dashatar_puzzle_tile_small_${widget.tile.value}'),
-          dimension: _TileSize.small,
-          child: child,
+    return IgnorePointer(
+      ignoring: !isNextToWhitespace,
+      child: AnimatedAlign(
+        alignment: FractionalOffset(
+          (widget.tile.currentPosition.x - 1) / (size - 1),
+          (widget.tile.currentPosition.y - 1) / (size - 1),
         ),
-        medium: (_, child) => SizedBox.square(
-          key: Key('dashatar_puzzle_tile_medium_${widget.tile.value}'),
-          dimension: _TileSize.medium,
-          child: child,
-        ),
-        large: (_, child) => SizedBox.square(
-          key: Key('dashatar_puzzle_tile_large_${widget.tile.value}'),
-          dimension: _TileSize.large,
-          child: child,
-        ),
-        child: (_) => MouseRegion(
-          onEnter: (_) {
-            if (canPress) {
-              _scaleController.forward();
-            }
-          },
-          onExit: (_) {
-            if (canPress) {
-              _scaleController.reverse();
-            }
-          },
-          child: ScaleTransition(
-            key: Key('simple_puzzle_tile_scale_${widget.tile.value}'),
-            scale: _scale,
-            child: AnimatedBuilder(
-              animation: _face1YRotation,
-              builder: (context, child) => Stack(
-                fit: StackFit.passthrough,
-                children: <Widget>[
-                  SlideTransition(
-                    position: _face1Position,
-                    child: Transform(
-                      alignment: _face1PositionAlignment,
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.001)
-                        ..rotateY(_face1YRotation.value)
-                        ..rotateX(_face1XRotation.value),
-                      child: CubeFace(
-                          is1: true,
-                          movementController: movementController,
-                          movementDirection: movementDirection,
-                          text: _face1Value.toString(),
-                          tile: widget.tile,
-                          state: widget.state,
-                          onPressed: () {
-                            if (canPress) {
-                              context
-                                  .read<PuzzleBloc>()
-                                  .add(TileTapped(widget.tile));
-                            }
-                          }),
+        duration: _movementDuration,
+        curve: Curves.easeInOut,
+        child: ResponsiveLayoutBuilder(
+          small: (_, child) => SizedBox.square(
+            key: Key('dashatar_puzzle_tile_small_${widget.tile.value}'),
+            dimension: _TileSize.small,
+            child: child,
+          ),
+          medium: (_, child) => SizedBox.square(
+            key: Key('dashatar_puzzle_tile_medium_${widget.tile.value}'),
+            dimension: _TileSize.medium,
+            child: child,
+          ),
+          large: (_, child) => SizedBox.square(
+            key: Key('dashatar_puzzle_tile_large_${widget.tile.value}'),
+            dimension: _TileSize.large,
+            child: child,
+          ),
+          child: (_) => AnimatedBuilder(
+            animation: _face1YRotation,
+            builder: (context, child) => MouseRegion(
+              onEnter: (_) {
+                if (!isAnimating) {
+                  movementController.animateTo(0.3);
+                }
+              },
+              onExit: (_) {
+                if (!isAnimating) {
+                  movementController.reverse();
+                }
+              },
+              child: ScaleTransition(
+                key: Key('simple_puzzle_tile_scale_${widget.tile.value}'),
+                scale: _scale,
+                child: Stack(
+                  fit: StackFit.passthrough,
+                  children: <Widget>[
+                    SlideTransition(
+                      position: _face1Position,
+                      child: Transform(
+                        alignment: _face1PositionAlignment,
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateY(_face1YRotation.value)
+                          ..rotateX(_face1XRotation.value),
+                        child: CubeFace(
+                            is1: true,
+                            movementController: movementController,
+                            movementDirection: movementDirection,
+                            color: _face1Color,
+                            tile: widget.tile,
+                            state: widget.state,
+                            onPressed: () {
+                              if (canPress) {
+                                context
+                                    .read<PuzzleBloc>()
+                                    .add(TileTapped(widget.tile));
+                              }
+                            }),
+                      ),
                     ),
-                  ),
-                  SlideTransition(
-                    position: _face2Position,
-                    child: Transform(
-                      alignment: _face2PositionAlignment,
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.001)
-                        ..rotateY(_face2YRotation.value)
-                        ..rotateX(_face2XRotation.value),
-                      child: CubeFace(
-                          is1: false,
-                          movementController: movementController,
-                          movementDirection: movementDirection,
-                          text: _face2Value.toString(),
-                          tile: widget.tile,
-                          state: widget.state,
-                          onPressed: () {
-                            if (canPress) {
-                              context
-                                  .read<PuzzleBloc>()
-                                  .add(TileTapped(widget.tile));
-                            }
-                          }),
-                    ),
-                  )
-                ],
+                    SlideTransition(
+                      position: _face2Position,
+                      child: Transform(
+                        alignment: _face2PositionAlignment,
+                        transform: Matrix4.identity()
+                          ..setEntry(3, 2, 0.001)
+                          ..rotateY(_face2YRotation.value)
+                          ..rotateX(_face2XRotation.value),
+                        child: CubeFace(
+                            is1: false,
+                            movementController: movementController,
+                            movementDirection: movementDirection,
+                            color: _face2color,
+                            tile: widget.tile,
+                            state: widget.state,
+                            onPressed: () {
+                              if (canPress) {
+                                context
+                                    .read<PuzzleBloc>()
+                                    .add(TileTapped(widget.tile));
+                              }
+                            }),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -457,7 +523,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 class CubeFace extends StatelessWidget {
   const CubeFace(
       {Key? key,
-      required this.text,
+      required this.color,
       required this.tile,
       required this.state,
       required this.onPressed,
@@ -466,7 +532,7 @@ class CubeFace extends StatelessWidget {
       required this.is1})
       : super(key: key);
 
-  final String text;
+  final Color color;
 
   final Tile tile;
 
@@ -483,72 +549,16 @@ class CubeFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
-    Radius topLeft = const Radius.circular(12);
-    Radius topRight = const Radius.circular(12);
-    Radius bottomLeft = const Radius.circular(12);
-    Radius bottomRight = const  Radius.circular(12);
-
-    if (movementController.value < 0.75) {
-      switch (movementDirection) {
-        case MovementDirection.right:
-        print('Right');
-          topRight = is1 ? const Radius.circular(12) : Radius.zero;
-          bottomRight = is1 ? Radius.circular(12) : Radius.zero;
-          topLeft = is1 ? Radius.zero : const Radius.circular(12);
-          bottomLeft = is1 ? Radius.zero : const Radius.circular(12);
-          break;
-        case MovementDirection.down:
-          topRight = Radius.zero;
-          bottomRight = Radius.zero;
-          topLeft = Radius.zero;
-          bottomLeft = Radius.zero;
-          break;
-        case MovementDirection.left:
-          topLeft = is1 ? const Radius.circular(12) : Radius.zero;
-          bottomLeft = is1 ? const Radius.circular(12) : Radius.zero;
-          topRight = is1 ? Radius.zero : const Radius.circular(12);
-          bottomRight = is1 ? Radius.zero : const Radius.circular(12);
-          break;
-        case MovementDirection.up:
-          topRight = Radius.zero;
-          bottomRight = Radius.zero;
-          topLeft = Radius.zero;
-          bottomLeft = Radius.zero;
-          break;
-        default:
-          break;
-      }
-    }
     return TextButton(
       style: TextButton.styleFrom(
-        primary: PuzzleColors.white,
-        textStyle: PuzzleTextStyle.headline2
-            .copyWith(color: Colors.black, fontSize: 40),
+        backgroundColor: color,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: topLeft,
-              topRight: topRight,
-              bottomLeft: bottomLeft,
-              bottomRight: bottomRight),
-        ),
-      ).copyWith(
-        foregroundColor: MaterialStateProperty.all(PuzzleColors.white),
-        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-          (states) {
-            if (tile.value == state.lastTappedTile?.value) {
-              return theme.pressedColor;
-            } else if (states.contains(MaterialState.hovered)) {
-              return theme.hoverColor;
-            } else {
-              return theme.defaultColor;
-            }
-          },
+          borderRadius: BorderRadius.all(Radius.circular(3)),
         ),
       ),
       onPressed: onPressed,
       child: Text(
-        text,
+        "",
         semanticsLabel: context.l10n.puzzleTileLabelText(
           tile.value.toString(),
           tile.currentPosition.x.toString(),
@@ -558,3 +568,61 @@ class CubeFace extends StatelessWidget {
     );
   }
 }
+
+
+//(states.contains(MaterialState.hovered))
+
+        //MaterialStateProperty.resolveWith<Color?>(
+        //   (states) {
+        //     if (tile.value == state.lastTappedTile?.value) {
+        //       return theme.defaultColor;
+        //     } else if  {
+        //       return theme.hoverColor;
+        //     } else {
+        //       return theme.defaultColor;
+        //     }
+        //   },
+        // ),
+
+    // Radius topLeft = Radius.circular(3);
+    // Radius topRight = Radius.circular(3);
+    // Radius bottomLeft = Radius.circular(3);
+    // Radius bottomRight = Radius.circular(3);   
+
+
+              //     topLeft: topLeft,
+              // topRight: topRight,
+              // bottomLeft: bottomLeft,
+              // bottomRight: bottomRight
+
+            // if ( 0 < movementController.value  && movementController.value < 0.72) {
+    //   switch (movementDirection) {
+    //     case MovementDirection.right:
+    //     print('Right');
+    //       topRight = is1 ? const Radius.circular(6) : Radius.zero;
+    //       bottomRight = is1 ? Radius.circular(6) : Radius.zero;
+    //       topLeft = is1 ? Radius.zero : const Radius.circular(6);
+    //       bottomLeft = is1 ? Radius.zero : const Radius.circular(6);
+    //       break;
+    //     case MovementDirection.down:
+    //       bottomRight = is1 ? Radius.circular(6) : Radius.zero;
+    //       topRight = is1 ? Radius.zero : const Radius.circular(6);
+    //       bottomLeft = is1 ? Radius.circular(6) : Radius.zero;
+    //       topLeft = is1 ? Radius.zero : const Radius.circular(6);
+    //       break;
+    //     case MovementDirection.left:
+    //       topLeft = is1 ? const Radius.circular(6) : Radius.zero;
+    //       bottomLeft = is1 ? const Radius.circular(6) : Radius.zero;
+    //       topRight = is1 ? Radius.zero : const Radius.circular(6);
+    //       bottomRight = is1 ? Radius.zero : const Radius.circular(6);
+    //       break;
+    //     case MovementDirection.up:
+    //       topRight = is1 ? Radius.circular(6) : Radius.zero;
+    //       bottomRight = is1 ? Radius.zero : const Radius.circular(6);
+    //       topLeft = is1 ? Radius.circular(6) : Radius.zero;
+    //       bottomLeft = is1 ? Radius.zero : const Radius.circular(6);
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // }

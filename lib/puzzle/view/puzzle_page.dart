@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
+import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/simple/simple.dart';
@@ -24,7 +25,7 @@ class PuzzlePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-                BlocProvider(
+        BlocProvider(
           create: (context) => ThemeBloc(
             initialThemes: [
               const SimpleTheme(),
@@ -61,26 +62,26 @@ class PuzzleView extends StatelessWidget {
         duration: PuzzleThemeAnimationDuration.backgroundColorChange,
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                create: (context) => TimerBloc(
-                  ticker: const Ticker(),
-                ),
+          providers: [
+            BlocProvider(
+              create: (context) => TimerBloc(
+                ticker: const Ticker(),
               ),
-              BlocProvider(
-                create: (context) => PuzzleBloc(4)
-                  ..add(
-                    PuzzleInitialized(
-                      shufflePuzzle: shufflePuzzle,
-                    ),
-                  ),
-              ),
-            ],
-            child: const _Puzzle(
-              key: Key('puzzle_view_puzzle'),
             ),
+            BlocProvider(
+              create: (context) => PuzzleBloc(4)
+                ..add(
+                  PuzzleInitialized(
+                    shufflePuzzle: shufflePuzzle,
+                  ),
+                ),
+            ),
+          ],
+          child: const _Puzzle(
+            key: Key('puzzle_view_puzzle'),
           ),
         ),
+      ),
     );
   }
 }
@@ -286,8 +287,40 @@ class _PuzzleTile extends StatelessWidget {
     final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
     final state = context.select((PuzzleBloc bloc) => bloc.state);
 
-    return tile.isWhitespace
+    final whiteSpaceTile = state.puzzleStatus == PuzzleStatus.incomplete
         ? theme.layoutDelegate.whitespaceTileBuilder()
+        : Align(
+                    alignment: FractionalOffset(
+                      (tile.currentPosition.x - 1) / (4 - 1),
+                      (tile.currentPosition.y - 1) / (4 - 1),
+                    ),
+                    child: ResponsiveLayoutBuilder(
+            small: (_, child) => SizedBox.square(
+              dimension: _TileSize.small,
+              child: child,
+            ),
+            medium: (_, child) => SizedBox.square(
+              dimension: _TileSize.medium,
+              child: child,
+            ),
+            large: (_, child) => SizedBox.square(
+                dimension: _TileSize.large,
+                child: child),
+            child: (_) => TextButton(
+                    
+                      child: Text(""),
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
+                        ),
+                      ),
+                    ),
+          ));
+    ;
+    return tile.isWhitespace
+        ? whiteSpaceTile
         : theme.layoutDelegate.tileBuilder(tile, state);
   }
 }
@@ -458,3 +491,9 @@ final numberOfMovesAndTilesLeftKey =
 /// Used to animate the transition of [AudioControl]
 /// when changing a theme.
 final audioControlKey = GlobalKey(debugLabel: 'audio_control');
+
+abstract class _TileSize {
+  static double small = 73; //75;
+  static double medium = 103; //100;
+  static double large = 115; //112;
+}

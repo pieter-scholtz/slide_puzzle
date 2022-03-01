@@ -73,9 +73,12 @@ class Puzzle extends Equatable {
     var numberOfCorrectTiles = 0;
     for (final tile in tiles) {
       if (tile != whitespaceTile) {
-        if (faceValues[tile.value][tile.cube!.visibleFace.index] ==
-            correctFaceValues[tile.currentPosition.y - 1]
-                [tile.currentPosition.x - 1]) {
+        //(faceValues[tile.value][tile.cube!.visibleFace.index] ==
+        //    correctFaceValues[tile.currentPosition.y - 1]
+        //        [tile.currentPosition.x - 1])
+        //print(faceColors[0][tiles[0].cube!.visibleFace.index].value);
+        if (faceColors[tile.value][tile.cube!.visibleFace.index].value ==
+            faceColors[0][tiles[0].cube!.visibleFace.index].value) {
           numberOfCorrectTiles++;
         }
       }
@@ -203,9 +206,9 @@ class Puzzle extends Equatable {
           return MovementDirection.right;
         } else if (tile.currentPosition.x < tile.previousPosition!.x) {
           return MovementDirection.left;
-        } else if (tile.currentPosition.y > tile.previousPosition!.y) {
-          return MovementDirection.up;
         } else if (tile.currentPosition.y < tile.previousPosition!.y) {
+          return MovementDirection.up;
+        } else if (tile.currentPosition.y > tile.previousPosition!.y) {
           return MovementDirection.down;
         } else {
           return MovementDirection.none;
@@ -231,6 +234,8 @@ class Puzzle extends Equatable {
       tiles[whitespaceTileIndex] = whitespaceTile.copyWith(
         updatedCurrentPosition: tile.currentPosition,
       );
+
+      print(updatedCube.visibleFace);
     }
 
     return Puzzle(tiles: tiles);
