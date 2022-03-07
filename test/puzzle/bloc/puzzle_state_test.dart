@@ -76,7 +76,7 @@ void main() {
           'passed', () {
         expect(
           PuzzleState().copyWith(numberOfMoves: 1),
-          equals(PuzzleState(numberOfMoves: 1)),
+          equals(PuzzleState(score: 1)),
         );
       });
     });

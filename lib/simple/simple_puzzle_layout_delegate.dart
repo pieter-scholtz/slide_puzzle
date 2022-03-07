@@ -63,7 +63,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           width: 184,
           height: 118,
           child: Image.asset(
-            'assets/images/simple_dash_small.png',
+            'assets/images/kdab_labs_small.png',
             key: const Key('simple_puzzle_dash_small'),
           ),
         ),
@@ -71,17 +71,18 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           width: 380.44,
           height: 214,
           child: Image.asset(
-            'assets/images/simple_dash_medium.png',
+            'assets/images/kdab_labs_small.png',
             key: const Key('simple_puzzle_dash_medium'),
           ),
         ),
         large: (_, __) => Padding(
-          padding: const EdgeInsets.only(bottom: 53),
+          padding: const EdgeInsets.only(bottom: 20
+          ),
           child: SizedBox(
-            width: 568.99,
-            height: 320,
+            width: 333,
+            height: 333,
             child: Image.asset(
-              'assets/images/simple_dash_large.png',
+              'assets/images/kdab_labs_small.png',
               key: const Key('simple_puzzle_dash_large'),
             ),
           ),
@@ -186,10 +187,9 @@ class SimpleStartSection extends StatelessWidget {
           medium: 16,
           large: 32,
         ),
-        NumberOfMovesAndTilesLeft(
+        Score(
           key: numberOfMovesAndTilesLeftKey,
-          numberOfMoves: state.numberOfMoves,
-          numberOfTilesLeft: state.numberOfTilesLeft,
+          score: state.score,
         ),
         const ResponsiveGap(
           large: 32,

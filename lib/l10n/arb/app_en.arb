@@ -8,17 +8,13 @@
     "@puzzleRestartTooltip": {
         "description": "Shown as a tooltip for the puzzle restart button"
     },
-    "puzzleChallengeTitle": "Puzzle Challenge",
+    "puzzleChallengeTitle": "Cubed Conundrum",
     "@puzzleChallengeTitle": {
         "description": "Shown as the title of the puzzle"
     },
-    "puzzleNumberOfMoves": "Moves",
-    "@puzzleNumberOfMoves": {
-        "description": "Indicates how many moves have been made on the current puzzle"
-    },
-    "puzzleNumberOfTilesLeft": "Tiles",
-    "@puzzleNumberOfTilesLeft": {
-        "description": "Indicates how many puzzle tiles are not in their correct position"
+    "puzzleScoreText": "Score",
+    "@puzzleScoreText": {
+        "description": "Indicates you current score"
     },
     "puzzleShuffle": "Shuffle",
     "@puzzleShuffle": {
@@ -84,17 +80,13 @@
             }
         }
     },
-    "puzzleNumberOfMovesAndTilesLeftLabelText": "Moves: {numberOfMoves}, tiles: {tilesLeft}",
-    "@puzzleNumberOfMovesAndTilesLeftLabelText": {
-        "description": "Semantic label for the puzzle tile",
+    "puzzleScoreLabelText": "Score: {score}",
+    "@puzzleScoreLabelText": {
+        "description": "Semantic label for the puzzle score",
         "placeholders": {
-            "numberOfMoves": {
+            "Score": {
                 "type": "String",
                 "example": "30"
-            },
-            "tilesLeft": {
-                "type": "String",
-                "example": "10"
             }
         }
     },

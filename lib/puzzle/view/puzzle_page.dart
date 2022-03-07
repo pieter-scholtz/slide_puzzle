@@ -8,7 +8,6 @@ import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/simple/simple.dart';
 import 'package:very_good_slide_puzzle/theme/theme.dart';
-import 'package:very_good_slide_puzzle/timer/timer.dart';
 import 'package:very_good_slide_puzzle/typography/typography.dart';
 
 /// {@template puzzle_page}
@@ -30,11 +29,6 @@ class PuzzlePage extends StatelessWidget {
             initialThemes: [
               const SimpleTheme(),
             ],
-          ),
-        ),
-        BlocProvider(
-          create: (_) => TimerBloc(
-            ticker: const Ticker(),
           ),
         ),
       ],
@@ -63,11 +57,6 @@ class PuzzleView extends StatelessWidget {
         decoration: BoxDecoration(color: theme.backgroundColor),
         child: MultiBlocProvider(
           providers: [
-            BlocProvider(
-              create: (context) => TimerBloc(
-                ticker: const Ticker(),
-              ),
-            ),
             BlocProvider(
               create: (context) => PuzzleBloc(4)
                 ..add(
@@ -251,12 +240,6 @@ class PuzzleBoard extends StatelessWidget {
     if (size == 0) return const CircularProgressIndicator();
 
     return PuzzleKeyboardHandler(
-      child: BlocListener<PuzzleBloc, PuzzleState>(
-        listener: (context, state) {
-          if (theme.hasTimer && state.puzzleStatus == PuzzleStatus.complete) {
-            context.read<TimerBloc>().add(const TimerStopped());
-          }
-        },
         child: theme.layoutDelegate.boardBuilder(
           size,
           puzzle.tiles
@@ -268,7 +251,7 @@ class PuzzleBoard extends StatelessWidget {
               )
               .toList(),
         ),
-      ),
+      
     );
   }
 }
@@ -420,43 +403,6 @@ class PuzzleMenuItem extends StatelessWidget {
           child: Tooltip(
             message:
                 theme != currentTheme ? context.l10n.puzzleChangeTooltip : '',
-            child: TextButton(
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-              ).copyWith(
-                overlayColor: MaterialStateProperty.all(Colors.transparent),
-              ),
-              onPressed: () {
-                // Ignore if this theme is already selected.
-                if (theme == currentTheme) {
-                  return;
-                }
-
-                // Update the currently selected theme.
-                context
-                    .read<ThemeBloc>()
-                    .add(ThemeChanged(themeIndex: themeIndex));
-
-                // Reset the timer of the currently running puzzle.
-                context.read<TimerBloc>().add(const TimerReset());
-
-                // Initialize the puzzle board for the newly selected theme.
-                context.read<PuzzleBloc>().add(
-                      PuzzleInitialized(
-                        shufflePuzzle: theme is SimpleTheme,
-                      ),
-                    );
-              },
-              child: AnimatedDefaultTextStyle(
-                duration: PuzzleThemeAnimationDuration.textStyle,
-                style: PuzzleTextStyle.headline5.copyWith(
-                  color: isCurrentTheme
-                      ? currentTheme.menuActiveColor
-                      : currentTheme.menuInactiveColor,
-                ),
-                child: Text(theme.name),
-              ),
-            ),
           ),
         );
       },
@@ -479,9 +425,9 @@ final puzzleNameKey = GlobalKey(debugLabel: 'puzzle_name');
 /// Used to animate the transition of [PuzzleTitle] when changing a theme.
 final puzzleTitleKey = GlobalKey(debugLabel: 'puzzle_title');
 
-/// The global key of [NumberOfMovesAndTilesLeft].
+/// The global key of [Score].
 ///
-/// Used to animate the transition of [NumberOfMovesAndTilesLeft]
+/// Used to animate the transition of [Score]
 /// when changing a theme.
 final numberOfMovesAndTilesLeftKey =
     GlobalKey(debugLabel: 'number_of_moves_and_tiles_left');

@@ -2,22 +2,14 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:very_good_slide_puzzle/colors/colors.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
 import 'package:very_good_slide_puzzle/models/cube.dart';
 import 'package:very_good_slide_puzzle/models/cube_movement.dart';
 import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
+import 'package:very_good_slide_puzzle/models/sizes.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
-import 'package:very_good_slide_puzzle/theme/bloc/theme_bloc.dart';
-import 'package:very_good_slide_puzzle/typography/text_styles.dart';
-
-abstract class _TileSize {
-  static double small = 73; //75;
-  static double medium = 103; //100;
-  static double large = 115; //112;
-}
 
 /// {@template cube_puzzle_tile}
 /// Displays the puzzle tile associated with [tile]
@@ -157,18 +149,12 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   void didUpdateWidget(CubePuzzleTile oldWidget) {
     movementDirection = MovementDirection.none;
 
-    print(widget.tile.value.toString() + "didUpdate");
+    //print(widget.tile.value.toString() + "didUpdate");
 
     Tile whitespaceTile =
         widget.state.puzzle.tiles.firstWhere((tile) => tile.isWhitespace);
 
-    Tile previousWhitespaceTile =
-        oldWidget.state.puzzle.tiles.firstWhere((tile) => tile.isWhitespace);
-
     Position whitespacePosition = whitespaceTile.currentPosition;
-
-    Position previousWhitespacePosition =
-        previousWhitespaceTile.currentPosition;
 
     Position currentPosition = widget.tile.currentPosition;
 
@@ -204,16 +190,12 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
 
   void calculateAnimantionValues(
       Position whitespacePosition, Position currentPosition, Cube cube) {
-    //print("refresh");
 
     isNextToWhitespace =
         (((currentPosition.x - whitespacePosition.x).abs() == 1) &&
                 ((currentPosition.y - whitespacePosition.y).abs() == 0)) ||
             (((currentPosition.y - whitespacePosition.y).abs() == 1) &&
                 ((currentPosition.x - whitespacePosition.x).abs() == 0));
-
-    // if (!((whitespacePosition.x == currentPosition.x) &&
-    //     (whitespacePosition.y == currentPosition.y))) {
 
     if (isNextToWhitespace) {
       _face1Position = Tween<Offset>(
@@ -243,7 +225,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       );
 
       if (whitespacePosition.x > currentPosition.x) {
-        print(widget.tile.value.toString() + "can move right");
+        //print(widget.tile.value.toString() + "can move right");
         movementDirection = MovementDirection.right;
 
         _face1PositionAlignment = Alignment.centerLeft;
@@ -280,7 +262,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       }
 
       if (whitespacePosition.x < currentPosition.x) {
-        print(widget.tile.value.toString() + "can move left");
+        //print(widget.tile.value.toString() + "can move left");
         movementDirection = MovementDirection.left;
 
         _face1PositionAlignment = Alignment.centerRight;
@@ -317,7 +299,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       }
 
       if (whitespacePosition.y > currentPosition.y) {
-        print(widget.tile.value.toString() + "can move down");
+        //print(widget.tile.value.toString() + "can move down");
         movementDirection = MovementDirection.down;
 
         _face1PositionAlignment = Alignment.topCenter;
@@ -354,7 +336,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
       }
 
       if (whitespacePosition.y < currentPosition.y) {
-        print(widget.tile.value.toString() + "can move up");
+        //print(widget.tile.value.toString() + "can move up");
         movementDirection = MovementDirection.up;
 
         _face1PositionAlignment = Alignment.bottomCenter;
@@ -413,12 +395,8 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         context.select((PuzzleBloc bloc) => bloc.state.puzzleStatus) ==
             PuzzleStatus.incomplete;
 
-    //isAnimating = movementController.value != 0 && movementController.value != 1;
-
-    final canPress = puzzleIncomplete;
-
     return IgnorePointer(
-      ignoring: !isNextToWhitespace,
+      ignoring: !isNextToWhitespace || !puzzleIncomplete,
       child: AnimatedAlign(
         alignment: FractionalOffset(
           (widget.tile.currentPosition.x - 1) / (size - 1),
@@ -429,29 +407,29 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         child: ResponsiveLayoutBuilder(
           small: (_, child) => SizedBox.square(
             key: Key('dashatar_puzzle_tile_small_${widget.tile.value}'),
-            dimension: _TileSize.small,
+            dimension: TileSize.small,
             child: child,
           ),
           medium: (_, child) => SizedBox.square(
             key: Key('dashatar_puzzle_tile_medium_${widget.tile.value}'),
-            dimension: _TileSize.medium,
+            dimension: TileSize.medium,
             child: child,
           ),
           large: (_, child) => SizedBox.square(
             key: Key('dashatar_puzzle_tile_large_${widget.tile.value}'),
-            dimension: _TileSize.large,
+            dimension: TileSize.large,
             child: child,
           ),
           child: (_) => AnimatedBuilder(
             animation: _face1YRotation,
             builder: (context, child) => MouseRegion(
               onEnter: (_) {
-                if (!isAnimating) {
+                if (!isAnimating && puzzleIncomplete) {
                   movementController.animateTo(0.3);
                 }
               },
               onExit: (_) {
-                if (!isAnimating) {
+                if (!isAnimating && puzzleIncomplete) {
                   movementController.reverse();
                 }
               },
@@ -477,7 +455,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
                             tile: widget.tile,
                             state: widget.state,
                             onPressed: () {
-                              if (canPress) {
+                              if (puzzleIncomplete) {
                                 context
                                     .read<PuzzleBloc>()
                                     .add(TileTapped(widget.tile));
@@ -501,7 +479,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
                             tile: widget.tile,
                             state: widget.state,
                             onPressed: () {
-                              if (canPress) {
+                              if (puzzleIncomplete) {
                                 context
                                     .read<PuzzleBloc>()
                                     .add(TileTapped(widget.tile));
@@ -558,7 +536,8 @@ class CubeFace extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: Text(
-        "",
+        tile.value.toString(),
+        style: TextStyle(color: Colors.white70),
         semanticsLabel: context.l10n.puzzleTileLabelText(
           tile.value.toString(),
           tile.currentPosition.x.toString(),

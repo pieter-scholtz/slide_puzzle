@@ -197,7 +197,7 @@ void main() {
       const numberOfMoves = 14;
       when(() => puzzleBloc.state).thenReturn(
         PuzzleState(
-          numberOfMoves: numberOfMoves,
+          score: numberOfMoves,
         ),
       );
 

@@ -39,7 +39,7 @@ class PuzzleTitle extends StatelessWidget {
         child: child,
       ),
       large: (context, child) => SizedBox(
-        width: 300,
+        width: 350,
         child: child,
       ),
       child: (currentSize) {

@@ -37,7 +37,7 @@ void main() {
       final themeState = ThemeState(themes: [theme], theme: theme);
 
       when(() => state.puzzleStatus).thenReturn(PuzzleStatus.incomplete);
-      when(() => state.numberOfMoves).thenReturn(5);
+      when(() => state.score).thenReturn(5);
       when(() => state.numberOfTilesLeft).thenReturn(15);
 
       when(() => theme.name).thenReturn(themeName);
@@ -398,8 +398,8 @@ void main() {
         expect(
           find.byWidgetPredicate(
             (widget) =>
-                widget is NumberOfMovesAndTilesLeft &&
-                widget.numberOfMoves == state.numberOfMoves &&
+                widget is Score &&
+                widget.score == state.score &&
                 widget.numberOfTilesLeft == state.numberOfTilesLeft,
           ),
           findsOneWidget,

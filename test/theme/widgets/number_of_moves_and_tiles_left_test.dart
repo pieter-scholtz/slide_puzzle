@@ -25,8 +25,8 @@ void main() {
       tester.setLargeDisplaySize();
 
       await tester.pumpApp(
-        NumberOfMovesAndTilesLeft(
-          numberOfMoves: 5,
+        Score(
+          score: 5,
           numberOfTilesLeft: 15,
         ),
         themeBloc: themeBloc,
@@ -42,8 +42,8 @@ void main() {
       tester.setMediumDisplaySize();
 
       await tester.pumpApp(
-        NumberOfMovesAndTilesLeft(
-          numberOfMoves: 5,
+        Score(
+          score: 5,
           numberOfTilesLeft: 15,
         ),
         themeBloc: themeBloc,
@@ -59,8 +59,8 @@ void main() {
       tester.setSmallDisplaySize();
 
       await tester.pumpApp(
-        NumberOfMovesAndTilesLeft(
-          numberOfMoves: 5,
+        Score(
+          score: 5,
           numberOfTilesLeft: 15,
         ),
         themeBloc: themeBloc,
@@ -74,8 +74,8 @@ void main() {
 
     testWidgets('renders the number of moves and tiles left', (tester) async {
       await tester.pumpApp(
-        NumberOfMovesAndTilesLeft(
-          numberOfMoves: 5,
+        Score(
+          score: 5,
           numberOfTilesLeft: 15,
         ),
         themeBloc: themeBloc,
@@ -102,8 +102,8 @@ void main() {
       const color = Colors.purple;
 
       await tester.pumpApp(
-        NumberOfMovesAndTilesLeft(
-          numberOfMoves: 5,
+        Score(
+          score: 5,
           numberOfTilesLeft: 15,
           color: color,
         ),
@@ -128,8 +128,8 @@ void main() {
       when(() => theme.defaultColor).thenReturn(themeColor);
 
       await tester.pumpApp(
-        NumberOfMovesAndTilesLeft(
-          numberOfMoves: 5,
+        Score(
+          score: 5,
           numberOfTilesLeft: 15,
         ),
         themeBloc: themeBloc,

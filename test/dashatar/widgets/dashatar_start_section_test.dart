@@ -97,7 +97,7 @@ void main() {
       const numberOfTilesLeft = 12;
 
       final puzzleState = MockPuzzleState();
-      when(() => puzzleState.numberOfMoves).thenReturn(numberOfMoves);
+      when(() => puzzleState.score).thenReturn(numberOfMoves);
       when(() => puzzleState.numberOfTilesLeft).thenReturn(numberOfTilesLeft);
 
       when(() => dashatarPuzzleState.status)
@@ -118,8 +118,8 @@ void main() {
       expect(
         find.byWidgetPredicate(
           (widget) =>
-              widget is NumberOfMovesAndTilesLeft &&
-              widget.numberOfMoves == numberOfMoves &&
+              widget is Score &&
+              widget.score == numberOfMoves &&
               widget.numberOfTilesLeft == numberOfTilesLeft,
         ),
         findsOneWidget,
@@ -133,7 +133,7 @@ void main() {
       const numberOfTiles = 16;
 
       final puzzleState = MockPuzzleState();
-      when(() => puzzleState.numberOfMoves).thenReturn(numberOfMoves);
+      when(() => puzzleState.score).thenReturn(numberOfMoves);
 
       final puzzle = MockPuzzle();
       when(() => puzzle.tiles)
@@ -158,8 +158,8 @@ void main() {
       expect(
         find.byWidgetPredicate(
           (widget) =>
-              widget is NumberOfMovesAndTilesLeft &&
-              widget.numberOfMoves == numberOfMoves &&
+              widget is Score &&
+              widget.score == numberOfMoves &&
               widget.numberOfTilesLeft == numberOfTiles - 1,
         ),
         findsOneWidget,

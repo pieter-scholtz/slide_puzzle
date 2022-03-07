@@ -19,37 +19,43 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     on<PuzzleReset>(_onPuzzleReset);
   }
 
+  late List<Tile> _moves = [];
+
   final int _size;
 
   final Random? random;
+
+  late bool isShuffling = false;
 
   void _onPuzzleInitialized(
     PuzzleInitialized event,
     Emitter<PuzzleState> emit,
   ) {
-    final puzzle = _generatePuzzle(_size, shuffle: event.shufflePuzzle);
+    final puzzle = _resetPuzzle(_size, shuffle: event.shufflePuzzle);
     emit(
       PuzzleState(
         puzzle: puzzle.sort(),
         numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
       ),
     );
+    print("puzzle init");
   }
 
   void _onTileTapped(TileTapped event, Emitter<PuzzleState> emit) {
     final tappedTile = event.tile;
     if (state.puzzleStatus == PuzzleStatus.incomplete) {
       if (state.puzzle.isTileMovable(tappedTile)) {
+        if (isShuffling == false) {_moves.add(tappedTile);}
         final mutablePuzzle = Puzzle(tiles: [...state.puzzle.tiles]);
         final puzzle = mutablePuzzle.moveTiles(tappedTile, []);
-        if (puzzle.isComplete()) {
+        if (puzzle.isComplete() && !isShuffling) {
           emit(
             state.copyWith(
               puzzle: puzzle.sort(),
               puzzleStatus: PuzzleStatus.complete,
               tileMovementStatus: TileMovementStatus.moved,
               numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
-              numberOfMoves: state.numberOfMoves + 1,
+              numberOfMoves: state.score + 1,
               lastTappedTile: tappedTile,
             ),
           );
@@ -59,7 +65,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
               puzzle: puzzle.sort(),
               tileMovementStatus: TileMovementStatus.moved,
               numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
-              numberOfMoves: state.numberOfMoves + 1,
+              numberOfMoves: state.score + 1,
               lastTappedTile: tappedTile,
             ),
           );
@@ -74,20 +80,40 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
       );
     }
+    print("Tile Tapped");
+    print(_moves);
   }
 
-  void _onPuzzleReset(PuzzleReset event, Emitter<PuzzleState> emit) {
-    final puzzle = _generatePuzzle(_size);
-    emit(
-      PuzzleState(
-        puzzle: puzzle.sort(),
-        numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
-      ),
-    );
+  void _onPuzzleReset(PuzzleReset event, Emitter<PuzzleState> emit) async {
+    //final puzzle = _resetPuzzle(_size);
+    isShuffling = true;
+
+    final someMoves = _moves;
+    _moves = [];
+
+    for (var i = someMoves.length - 1; i >= 0; i--) {
+      print(someMoves[i]);
+
+      await Future.delayed(const Duration(milliseconds: 300), () {
+        this.add(TileTapped(
+          state.puzzle.tiles
+              .singleWhere((tile) => tile.value == someMoves[i].value),
+        ));
+      });
+    }
+
+    // emit(
+    //   PuzzleState(
+    //     puzzle: puzzle.sort(),
+    //     numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
+    //   ),
+    // );
+    await Future.delayed(const Duration(milliseconds: 100), () {
+      isShuffling = false;
+    });
   }
 
-  /// Build a randomized, solvable puzzle of the given size.
-  Puzzle _generatePuzzle(int size, {bool shuffle = true}) {
+  Puzzle _resetPuzzle(int size, {bool shuffle = true}) {
     final correctPositions = <Position>[];
     final currentPositions = <Position>[];
     final whitespacePosition = Position(x: size, y: size);
@@ -106,10 +132,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
       }
     }
 
-    if (shuffle) {
-      // Randomize only the current tile posistions.
-      //currentPositions.shuffle(random);
-    }
+    //TODO: hardcode this perhaps ?
 
     var tiles = _getTileListFromPositions(
       size,
@@ -118,21 +141,6 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     );
 
     var puzzle = Puzzle(tiles: tiles);
-
-    if (shuffle) {
-      // Assign the tiles new current positions until the puzzle is solvable and
-      // zero tiles are in their correct position.
-      // while (!puzzle.isSolvable() || puzzle.getNumberOfCorrectTiles() != 0) {
-      //   currentPositions.shuffle(random);
-      //   tiles = _getTileListFromPositions(
-      //     size,
-      //     correctPositions,
-      //     currentPositions,
-      //   );
-      //   puzzle = Puzzle(tiles: tiles);
-      // }
-      //puzzle = Puzzle(tiles: tiles);
-    }
 
     return puzzle;
   }
@@ -150,7 +158,8 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         if (i == size * size)
           Tile(
             value: i,
-            cube: const Cube(visibleFace: Face.A,orientation: Angle.degrees(0)),
+            cube:
+                const Cube(visibleFace: Face.A, orientation: Angle.degrees(0)),
             correctPosition: whitespacePosition,
             currentPosition: currentPositions[i - 1],
             isWhitespace: true,
@@ -158,7 +167,8 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         else
           Tile(
             value: i,
-            cube: const Cube(visibleFace: Face.A,orientation: Angle.degrees(0)),
+            cube:
+                const Cube(visibleFace: Face.A, orientation: Angle.degrees(0)),
             previousPosition: currentPositions[i - 1],
             correctPosition: correctPositions[i - 1],
             currentPosition: currentPositions[i - 1],
