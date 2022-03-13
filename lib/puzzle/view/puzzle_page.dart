@@ -270,37 +270,7 @@ class _PuzzleTile extends StatelessWidget {
     final theme = context.select((ThemeBloc bloc) => bloc.state.theme);
     final state = context.select((PuzzleBloc bloc) => bloc.state);
 
-    final whiteSpaceTile = state.puzzleStatus == PuzzleStatus.incomplete
-        ? theme.layoutDelegate.whitespaceTileBuilder()
-        : Align(
-                    alignment: FractionalOffset(
-                      (tile.currentPosition.x - 1) / (4 - 1),
-                      (tile.currentPosition.y - 1) / (4 - 1),
-                    ),
-                    child: ResponsiveLayoutBuilder(
-            small: (_, child) => SizedBox.square(
-              dimension: _TileSize.small,
-              child: child,
-            ),
-            medium: (_, child) => SizedBox.square(
-              dimension: _TileSize.medium,
-              child: child,
-            ),
-            large: (_, child) => SizedBox.square(
-                dimension: _TileSize.large,
-                child: child),
-            child: (_) => TextButton(
-                    
-                      child: Text(""),
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(3)),
-                        ),
-                      ),
-                    ),
-          ));
+    final whiteSpaceTile = theme.layoutDelegate.whitespaceTileBuilder(tile,state);
     ;
     return tile.isWhitespace
         ? whiteSpaceTile

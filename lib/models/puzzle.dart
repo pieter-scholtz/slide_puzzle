@@ -37,7 +37,7 @@ import 'package:very_good_slide_puzzle/models/models.dart';
 /// {@endtemplate}
 class Puzzle extends Equatable {
   /// {@macro puzzle}
-  const Puzzle({required this.tiles});
+   const Puzzle({required this.tiles});
 
   /// List of [Tile]s representing the puzzle's current arrangement.
   final List<Tile> tiles;
@@ -90,6 +90,8 @@ class Puzzle extends Equatable {
   bool isComplete() {
     return (tiles.length - 1) - getNumberOfCorrectTiles() == 0;
   }
+
+
 
   /// Determines if the tapped tile can move in the direction of the whitespace
   /// tile.

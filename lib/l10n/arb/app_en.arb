@@ -20,7 +20,11 @@
     "@puzzleShuffle": {
         "description": "Shown on the button that shuffle the puzzle"
     },
-    "puzzleCompleted": "Well done. Congrats!",
+    "puzzleReset": "Reset",
+    "@puzzleReset": {
+        "description": "Shown on the button that resets the puzzle"
+    },
+    "puzzleCompleted": "You clever cubist!",
     "@puzzleCompleted": {
         "description": "Shown as the success state when the puzzle is completed"
     },

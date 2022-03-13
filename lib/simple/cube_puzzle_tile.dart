@@ -394,9 +394,13 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
     final puzzleIncomplete =
         context.select((PuzzleBloc bloc) => bloc.state.puzzleStatus) ==
             PuzzleStatus.incomplete;
+    final isComplete =
+        context.select((PuzzleBloc bloc) => bloc.state.puzzle.isComplete()) == false;
+         final isBusy =
+        context.select((PuzzleBloc bloc) => bloc.state.isBusy) == true;    
 
     return IgnorePointer(
-      ignoring: !isNextToWhitespace || !puzzleIncomplete,
+      ignoring: !isNextToWhitespace || !puzzleIncomplete || !isComplete || isBusy ,
       child: AnimatedAlign(
         alignment: FractionalOffset(
           (widget.tile.currentPosition.x - 1) / (size - 1),
@@ -406,7 +410,7 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         curve: Curves.easeInOut,
         child: ResponsiveLayoutBuilder(
           small: (_, child) => SizedBox.square(
-            key: Key('dashatar_puzzle_tile_small_${widget.tile.value}'),
+            key: Key('dashatar_puzisCompletezle_tile_small_${widget.tile.value}'),
             dimension: TileSize.small,
             child: child,
           ),
@@ -536,7 +540,7 @@ class CubeFace extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: Text(
-        tile.value.toString(),
+        "",//tile.value.toString(),
         style: TextStyle(color: Colors.white70),
         semanticsLabel: context.l10n.puzzleTileLabelText(
           tile.value.toString(),
@@ -547,61 +551,3 @@ class CubeFace extends StatelessWidget {
     );
   }
 }
-
-
-//(states.contains(MaterialState.hovered))
-
-        //MaterialStateProperty.resolveWith<Color?>(
-        //   (states) {
-        //     if (tile.value == state.lastTappedTile?.value) {
-        //       return theme.defaultColor;
-        //     } else if  {
-        //       return theme.hoverColor;
-        //     } else {
-        //       return theme.defaultColor;
-        //     }
-        //   },
-        // ),
-
-    // Radius topLeft = Radius.circular(3);
-    // Radius topRight = Radius.circular(3);
-    // Radius bottomLeft = Radius.circular(3);
-    // Radius bottomRight = Radius.circular(3);   
-
-
-              //     topLeft: topLeft,
-              // topRight: topRight,
-              // bottomLeft: bottomLeft,
-              // bottomRight: bottomRight
-
-            // if ( 0 < movementController.value  && movementController.value < 0.72) {
-    //   switch (movementDirection) {
-    //     case MovementDirection.right:
-    //     print('Right');
-    //       topRight = is1 ? const Radius.circular(6) : Radius.zero;
-    //       bottomRight = is1 ? Radius.circular(6) : Radius.zero;
-    //       topLeft = is1 ? Radius.zero : const Radius.circular(6);
-    //       bottomLeft = is1 ? Radius.zero : const Radius.circular(6);
-    //       break;
-    //     case MovementDirection.down:
-    //       bottomRight = is1 ? Radius.circular(6) : Radius.zero;
-    //       topRight = is1 ? Radius.zero : const Radius.circular(6);
-    //       bottomLeft = is1 ? Radius.circular(6) : Radius.zero;
-    //       topLeft = is1 ? Radius.zero : const Radius.circular(6);
-    //       break;
-    //     case MovementDirection.left:
-    //       topLeft = is1 ? const Radius.circular(6) : Radius.zero;
-    //       bottomLeft = is1 ? const Radius.circular(6) : Radius.zero;
-    //       topRight = is1 ? Radius.zero : const Radius.circular(6);
-    //       bottomRight = is1 ? Radius.zero : const Radius.circular(6);
-    //       break;
-    //     case MovementDirection.up:
-    //       topRight = is1 ? Radius.circular(6) : Radius.zero;
-    //       bottomRight = is1 ? Radius.zero : const Radius.circular(6);
-    //       topLeft = is1 ? Radius.circular(6) : Radius.zero;
-    //       bottomLeft = is1 ? Radius.zero : const Radius.circular(6);
-    //       break;
-    //     default:
-    //       break;
-    //   }
-    // }

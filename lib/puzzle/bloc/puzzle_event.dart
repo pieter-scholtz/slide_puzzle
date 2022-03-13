@@ -35,10 +35,6 @@ class PuzzleShuffle extends PuzzleEvent {
   const PuzzleShuffle();
 }
 
-class PuzzleUnShuffle extends PuzzleEvent {
-  const PuzzleUnShuffle();
-}
-
 class PuzzleIgnoreInput extends PuzzleEvent {
   const PuzzleIgnoreInput({required this.ignoreInput});
 

@@ -156,19 +156,10 @@ const List<FaceRelationship> faceRelationships = [
 
 ///This represents movement directions of a cube.
 enum MovementDirection {
-  ///
   up,
-
-  ///
   right,
-
-  ///
   down,
-
-  ///
   left,
-
-  ///
   none,
 }
 

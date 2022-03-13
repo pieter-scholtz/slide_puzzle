@@ -124,7 +124,7 @@ void main() {
         );
 
         expect(find.byType(SizedBox), findsOneWidget);
-        expect(find.byType(SimplePuzzleShuffleButton), findsNothing);
+        expect(find.byType(SimplePuzzleResetButton), findsNothing);
       });
 
       testWidgets(
@@ -139,7 +139,7 @@ void main() {
           themeBloc: themeBloc,
         );
 
-        expect(find.byType(SimplePuzzleShuffleButton), findsOneWidget);
+        expect(find.byType(SimplePuzzleResetButton), findsOneWidget);
       });
 
       testWidgets(
@@ -154,7 +154,7 @@ void main() {
           themeBloc: themeBloc,
         );
 
-        expect(find.byType(SimplePuzzleShuffleButton), findsOneWidget);
+        expect(find.byType(SimplePuzzleResetButton), findsOneWidget);
       });
     });
 
@@ -419,7 +419,7 @@ void main() {
         );
 
         expect(
-          find.byType(SimplePuzzleShuffleButton),
+          find.byType(SimplePuzzleResetButton),
           findsOneWidget,
         );
       });
@@ -555,12 +555,12 @@ void main() {
         final puzzleBloc = MockPuzzleBloc();
 
         await tester.pumpApp(
-          SimplePuzzleShuffleButton(),
+          SimplePuzzleResetButton(),
           themeBloc: themeBloc,
           puzzleBloc: puzzleBloc,
         );
 
-        await tester.tap(find.byType(SimplePuzzleShuffleButton));
+        await tester.tap(find.byType(SimplePuzzleResetButton));
 
         verify(() => puzzleBloc.add(PuzzleReset())).called(1);
       });

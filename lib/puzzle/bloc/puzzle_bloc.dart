@@ -17,38 +17,38 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     on<PuzzleInitialized>(_onPuzzleInitialized);
     on<TileTapped>(_onTileTapped);
     on<PuzzleReset>(_onPuzzleReset);
+    on<PuzzleShuffle>(_onPuzzleShuffle);
   }
 
-  late List<Tile> _moves = [];
+  late List<int> _moves = [];
 
   final int _size;
 
   final Random? random;
 
-  late bool isShuffling = false;
+  //late bool isRes
 
   void _onPuzzleInitialized(
     PuzzleInitialized event,
     Emitter<PuzzleState> emit,
   ) {
-    final puzzle = _resetPuzzle(_size, shuffle: event.shufflePuzzle);
+    final puzzle = _initializePuzzle(_size, shuffle: event.shufflePuzzle);
     emit(
       PuzzleState(
         puzzle: puzzle.sort(),
         numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
       ),
     );
-    print("puzzle init");
   }
 
   void _onTileTapped(TileTapped event, Emitter<PuzzleState> emit) {
     final tappedTile = event.tile;
     if (state.puzzleStatus == PuzzleStatus.incomplete) {
       if (state.puzzle.isTileMovable(tappedTile)) {
-        if (isShuffling == false) {_moves.add(tappedTile);}
+        _moves.add(tappedTile.value);
         final mutablePuzzle = Puzzle(tiles: [...state.puzzle.tiles]);
         final puzzle = mutablePuzzle.moveTiles(tappedTile, []);
-        if (puzzle.isComplete() && !isShuffling) {
+        if (puzzle.isComplete()) {
           emit(
             state.copyWith(
               puzzle: puzzle.sort(),
@@ -71,49 +71,70 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
           );
         }
       } else {
-        emit(
-          state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
-        );
+        //emit(
+        //  state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
+        //);
       }
     } else {
-      emit(
-        state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
-      );
+      //emit(
+      //  state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
+      //);
     }
-    print("Tile Tapped");
     print(_moves);
   }
 
   void _onPuzzleReset(PuzzleReset event, Emitter<PuzzleState> emit) async {
-    //final puzzle = _resetPuzzle(_size);
-    isShuffling = true;
+    emit(
+      state.copyWith(isBusy: true),
+    );
 
-    final someMoves = _moves;
+    final _movesCopy = _moves;
     _moves = [];
 
-    for (var i = someMoves.length - 1; i >= 0; i--) {
-      print(someMoves[i]);
+    for (var i = _movesCopy.length - 1; i >= 0; i--) {
+      print(_movesCopy[i]);
 
       await Future.delayed(const Duration(milliseconds: 300), () {
         this.add(TileTapped(
-          state.puzzle.tiles
-              .singleWhere((tile) => tile.value == someMoves[i].value),
+          state.puzzle.tiles.singleWhere((tile) => tile.value == _movesCopy[i]),
         ));
       });
     }
 
-    // emit(
-    //   PuzzleState(
-    //     puzzle: puzzle.sort(),
-    //     numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
-    //   ),
-    // );
-    await Future.delayed(const Duration(milliseconds: 100), () {
-      isShuffling = false;
+    await Future.delayed(const Duration(milliseconds: 600), () {
+      emit(
+        state.copyWith(isBusy: false),
+      );
+    });
+
+    _moves = [];
+  }
+
+  void _onPuzzleShuffle(PuzzleShuffle event, Emitter<PuzzleState> emit) async {
+    emit(
+      state.copyWith(isBusy: true, puzzleStatus: PuzzleStatus.incomplete),
+    );
+
+    List<int> shuffleMoves = [15,14,13];
+
+    for (var i = 0; i <= shuffleMoves.length - 1; i++) {
+      print(shuffleMoves[i]);
+
+      await Future.delayed(const Duration(milliseconds: 300), () {
+        this.add(TileTapped(
+          state.puzzle.tiles
+              .singleWhere((tile) => tile.value == shuffleMoves[i]),
+        ));
+      });
+    }
+    await Future.delayed(const Duration(milliseconds: 600), () {
+      emit(
+        state.copyWith(isBusy: false),
+      );
     });
   }
 
-  Puzzle _resetPuzzle(int size, {bool shuffle = true}) {
+  Puzzle _initializePuzzle(int size, {bool shuffle = true}) {
     final correctPositions = <Position>[];
     final currentPositions = <Position>[];
     final whitespacePosition = Position(x: size, y: size);
@@ -131,8 +152,6 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
         }
       }
     }
-
-    //TODO: hardcode this perhaps ?
 
     var tiles = _getTileListFromPositions(
       size,
@@ -176,3 +195,426 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     ];
   }
 }
+
+
+    // final someMoves = [
+    //   12,
+    //   15,
+    //   11,
+    //   12,
+    //   15,
+    //   14,
+    //   13,
+    //   6,
+    //   5,
+    //   3,
+    //   4,
+    //   7,
+    //   8,
+    //   4,
+    //   3,
+    //   2,
+    //   1,
+    //   5,
+    //   6,
+    //   10,
+    //   9,
+    //   13,
+    //   14,
+    //   15
+    // ];
+
+
+    // final shuffleMoves = [
+    //   15,
+    //   14,
+    //   13,
+    //   9,
+    //   10,
+    //   11,
+    //   12,
+    //   8,
+    //   7,
+    //   6,
+    //   5,
+    //   1,
+    //   2,
+    //   3,
+    //   4,
+    //   7,
+    //   6,
+    //   4,
+    //   7,
+    //   6,
+    //   4,
+    //   7,
+    //   6,
+    //   4,
+    //   7,
+    //   5,
+    //   1,
+    //   10,
+    //   11,
+    //   1,
+    //   10,
+    //   11,
+    //   1,
+    //   10,
+    //   11,
+    //   1,
+    //   10,
+    //   13,
+    //   9,
+    //   10,
+    //   13,
+    //   12,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   8,
+    //   12,
+    //   13,
+    //   10,
+    //   9,
+    //   13,
+    //   10,
+    //   9,
+    //   13,
+    //   14,
+    //   15,
+    //   8,
+    //   7,
+    //   5,
+    //   12,
+    //   7,
+    //   5,
+    //   12,
+    //   7,
+    //   5,
+    //   12,
+    //   7,
+    //   5,
+    //   15,
+    //   8,
+    //   12,
+    //   15,
+    //   8,
+    //   12,
+    //   15,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   5,
+    //   8,
+    //   7,
+    //   15,
+    //   12,
+    //   7,
+    //   15,
+    //   5,
+    //   8,
+    //   15,
+    //   5,
+    //   8,
+    //   15,
+    //   5,
+    //   8,
+    //   15,
+    //   5,
+    //   8,
+    //   15,
+    //   5,
+    //   8,
+    //   15,
+    //   5,
+    //   12,
+    //   7,
+    //   5,
+    //   10,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   9,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   9,
+    //   14,
+    //   13,
+    //   5,
+    //   10,
+    //   13,
+    //   5,
+    //   9,
+    //   14,
+    //   5,
+    //   9,
+    //   14,
+    //   5,
+    //   9,
+    //   14,
+    //   5,
+    //   9,
+    //   14,
+    //   5,
+    //   10,
+    //   13,
+    //   5,
+    //   14,
+    //   14,
+    //   5,
+    //   12,
+    //   7,
+    //   13,
+    //   12,
+    //   7,
+    //   13,
+    //   13,
+    //   13,
+    //   12,
+    //   7,
+    //   5,
+    //   14,
+    //   9,
+    //   10,
+    //   14,
+    //   9,
+    //   10,
+    //   14,
+    //   9,
+    //   10,
+    //   14,
+    //   9,
+    //   7,
+    //   12,
+    //   13,
+    //   5,
+    //   12,
+    //   13,
+    //   5,
+    //   12,
+    //   13,
+    //   5,
+    //   12,
+    //   13,
+    //   5,
+    //   12,
+    //   13,
+    //   13,
+    //   12,
+    //   7,
+    //   9,
+    //   14,
+    //   10,
+    //   5,
+    //   13,
+    //   12,
+    //   7,
+    //   9,
+    //   14,
+    //   10,
+    //   5,
+    //   13,
+    //   12,
+    //   7,
+    //   9,
+    //   14,
+    //   10,
+    //   5,
+    //   13,
+    //   12,
+    //   7,
+    //   9,
+    //   14,
+    //   10,
+    //   5,
+    //   13,
+    //   12,
+    //   7,
+    //   9,
+    //   9,
+    //   9,
+    //   14,
+    //   10,
+    //   5,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   5,
+    //   9,
+    //   12,
+    //   5,
+    //   7,
+    //   13,
+    //   5,
+    //   7,
+    //   13,
+    //   5,
+    //   7,
+    //   13,
+    //   5,
+    //   7,
+    //   13,
+    //   12,
+    //   12,
+    //   13,
+    //   13,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   13,
+    //   7,
+    //   7,
+    //   13,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   9,
+    //   5,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   13,
+    //   7,
+    //   12,
+    //   12,
+    //   7,
+    //   7,
+    //   5,
+    //   9,
+    //   12,
+    //   5,
+    //   9,
+    //   12,
+    //   5,
+    //   9,
+    //   7
+    // ];

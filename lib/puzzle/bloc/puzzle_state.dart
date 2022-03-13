@@ -10,6 +10,7 @@ class PuzzleState extends Equatable {
   const PuzzleState({
     this.puzzle = const Puzzle(tiles: []),
     this.puzzleStatus = PuzzleStatus.incomplete,
+    this.isBusy = false,
     this.tileMovementStatus = TileMovementStatus.nothingTapped,
     this.numberOfCorrectTiles = 0,
     this.score = 0,
@@ -22,6 +23,8 @@ class PuzzleState extends Equatable {
   /// Status indicating the current state of the puzzle.
   final PuzzleStatus puzzleStatus;
 
+  final bool isBusy;
+  
   /// Status indicating if a [Tile] was moved or why a [Tile] was not moved.
   final TileMovementStatus tileMovementStatus;
 
@@ -47,6 +50,7 @@ class PuzzleState extends Equatable {
   PuzzleState copyWith({
     Puzzle? puzzle,
     PuzzleStatus? puzzleStatus,
+    bool? isBusy,
     TileMovementStatus? tileMovementStatus,
     int? numberOfCorrectTiles,
     int? numberOfMoves,
@@ -55,6 +59,7 @@ class PuzzleState extends Equatable {
     return PuzzleState(
       puzzle: puzzle ?? this.puzzle,
       puzzleStatus: puzzleStatus ?? this.puzzleStatus,
+      isBusy: isBusy ?? this.isBusy,
       tileMovementStatus: tileMovementStatus ?? this.tileMovementStatus,
       numberOfCorrectTiles: numberOfCorrectTiles ?? this.numberOfCorrectTiles,
       score: numberOfMoves ?? this.score,
@@ -66,6 +71,7 @@ class PuzzleState extends Equatable {
   List<Object?> get props => [
         puzzle,
         puzzleStatus,
+        isBusy,
         tileMovementStatus,
         numberOfCorrectTiles,
         score,

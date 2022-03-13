@@ -4,7 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:very_good_slide_puzzle/colors/colors.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
+import 'package:very_good_slide_puzzle/models/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
+import 'package:very_good_slide_puzzle/models/sizes.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/simple/cube_puzzle_tile.dart';
 import 'package:very_good_slide_puzzle/simple/simple.dart';
@@ -41,8 +43,8 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           medium: 48,
         ),
         ResponsiveLayoutBuilder(
-          small: (_, child) => const SimplePuzzleShuffleButton(),
-          medium: (_, child) => const SimplePuzzleShuffleButton(),
+          small: (_, child) => const SimplePuzzleResetButton(),
+          medium: (_, child) => const SimplePuzzleResetButton(),
           large: (_, __) => const SizedBox(),
         ),
         const ResponsiveGap(
@@ -143,8 +145,43 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
   }
 
   @override
-  Widget whitespaceTileBuilder() {
-    return  const SizedBox();
+  Widget whitespaceTileBuilder(Tile tile,PuzzleState state) {
+
+      final whiteSpace = 
+        Align(
+                    alignment: FractionalOffset(
+                      (tile.currentPosition.x - 1) / (4 - 1),
+                      (tile.currentPosition.y - 1) / (4 - 1),
+                    ),
+                    child: ResponsiveLayoutBuilder(
+            small: (_, child) => SizedBox.square(
+              dimension: TileSize.small,
+              child: child,
+            ),
+            medium: (_, child) => SizedBox.square(
+              dimension: TileSize.medium,
+              child: child,
+            ),
+            large: (_, child) => SizedBox.square(
+                dimension: TileSize.large,
+                child: child),
+            child: (_) => TextButton(
+                    
+                      child: Text(""),
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                        backgroundColor: faceColors[0][state.puzzle.tiles[0].cube!.visibleFace.index],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(3)),
+                        ),
+                      ),
+                    ),
+          ));
+    
+    return AnimatedSwitcher(switchOutCurve:const Interval(0.5, 1, curve: Curves.linear),switchInCurve:const Interval(0.5, 1, curve: Curves.linear),duration: Duration(milliseconds: 1000),child:  state.puzzleStatus == PuzzleStatus.incomplete
+        ? const SizedBox(): whiteSpace);
+
+    
   }
 
   @override
@@ -175,9 +212,13 @@ class SimpleStartSection extends StatelessWidget {
           medium: 83,
           large: 151,
         ),
-        PuzzleName(
-          key: puzzleNameKey,
-        ),
+        // PuzzleName(
+        //   key: puzzleNameKey,
+        // ),
+        const ResponsiveGap(
+           large: 32,
+           small: 16,
+         ),
         const ResponsiveGap(large: 16),
         SimplePuzzleTitle(
           status: state.puzzleStatus,
@@ -187,18 +228,18 @@ class SimpleStartSection extends StatelessWidget {
           medium: 16,
           large: 32,
         ),
-        Score(
-          key: numberOfMovesAndTilesLeftKey,
-          score: state.score,
-        ),
-        const ResponsiveGap(
-          large: 32,
-          small: 16,
-        ),
+        // Score(
+        //   key: numberOfMovesAndTilesLeftKey,
+        //   score: state.score,
+        // ),
+        // const ResponsiveGap(
+        //   large: 32,
+        //   small: 16,
+        // ),
         ResponsiveLayoutBuilder(
           small: (_, __) => const SizedBox(),
           medium: (_, __) => const SizedBox(),
-          large: (_, __) => const SimplePuzzleShuffleButton(),
+          large: (_, __) => state.puzzle.isComplete() ? SimplePuzzleShuffleButton() : SimplePuzzleResetButton() ,
         ),
       ],
     );
@@ -226,9 +267,9 @@ class SimplePuzzleTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return PuzzleTitle(
       key: puzzleTitleKey,
-      title: status == PuzzleStatus.complete
-          ? context.l10n.puzzleCompleted
-          : context.l10n.puzzleChallengeTitle,
+      title: context.l10n.puzzleChallengeTitle,//status == PuzzleStatus.complete
+          //? context.l10n.puzzleCompleted
+          //: context.l10n.puzzleChallengeTitle,
     );
   }
 }
@@ -345,9 +386,9 @@ class SimplePuzzleTile extends StatelessWidget {
 /// Displays the button to shuffle the puzzle.
 /// {@endtemplate}
 @visibleForTesting
-class SimplePuzzleShuffleButton extends StatelessWidget {
+class SimplePuzzleResetButton extends StatelessWidget {
   /// {@macro puzzle_shuffle_button}
-  const SimplePuzzleShuffleButton({Key? key}) : super(key: key);
+  const SimplePuzzleResetButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -355,6 +396,32 @@ class SimplePuzzleShuffleButton extends StatelessWidget {
       textColor: PuzzleColors.primary0,
       backgroundColor: PuzzleColors.primary6,
       onPressed: () => context.read<PuzzleBloc>().add(const PuzzleReset()),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/shuffle_icon.png',
+            width: 17,
+            height: 17,
+          ),
+          const Gap(10),
+          Text(context.l10n.puzzleReset),
+        ],
+      ),
+    );
+  }
+}
+
+class SimplePuzzleShuffleButton extends StatelessWidget {
+  /// {@macro puzzle_start_button}
+  const SimplePuzzleShuffleButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return PuzzleButton(
+      textColor: PuzzleColors.primary0,
+      backgroundColor: PuzzleColors.primary6,
+      onPressed: () => context.read<PuzzleBloc>().add(const PuzzleShuffle()),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
