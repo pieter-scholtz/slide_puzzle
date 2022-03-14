@@ -10,7 +10,10 @@ enum ResponsiveLayoutSize {
   medium,
 
   /// Large layout
-  large
+  large,
+  
+  /// RaspberryPi layout
+  rpi
 }
 
 /// Signature for the individual builders (`small`, `medium`, `large`).
@@ -27,6 +30,7 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
     required this.small,
     required this.medium,
     required this.large,
+    required this.rpi,
     this.child,
   }) : super(key: key);
 
@@ -39,6 +43,9 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
   /// [ResponsiveLayoutWidgetBuilder] for large layout.
   final ResponsiveLayoutWidgetBuilder large;
 
+    /// [ResponsiveLayoutWidgetBuilder] for large layout.
+  final ResponsiveLayoutWidgetBuilder rpi;
+
   /// Optional child widget builder based on the current layout size
   /// which will be passed to the `small`, `medium` and `large` builders
   /// as a way to share/optimize shared layout.
@@ -50,15 +57,17 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
       builder: (context, constraints) {
         final screenWidth = MediaQuery.of(context).size.width;
 
-        if (screenWidth <= PuzzleBreakpoints.small) {
-          return small(context, child?.call(ResponsiveLayoutSize.small));
-        }
-        if (screenWidth <= PuzzleBreakpoints.medium) {
-          return medium(context, child?.call(ResponsiveLayoutSize.medium));
-        }
-        if (screenWidth <= PuzzleBreakpoints.large) {
-          return large(context, child?.call(ResponsiveLayoutSize.large));
-        }
+        return rpi(context, child?.call(ResponsiveLayoutSize.rpi));
+
+         if (screenWidth <= PuzzleBreakpoints.small) {
+           return small(context, child?.call(ResponsiveLayoutSize.small));
+         }
+         if (screenWidth <= PuzzleBreakpoints.medium) {
+           return medium(context, child?.call(ResponsiveLayoutSize.medium));
+         }
+         if (screenWidth <= PuzzleBreakpoints.large) {
+           return large(context, child?.call(ResponsiveLayoutSize.large));
+         }
 
         return large(context, child?.call(ResponsiveLayoutSize.large));
       },

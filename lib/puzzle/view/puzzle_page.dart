@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
-import 'package:very_good_slide_puzzle/models/face_values.dart';
+import 'package:very_good_slide_puzzle/constants/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/simple/simple.dart';
@@ -155,6 +155,18 @@ class PuzzleHeader extends StatelessWidget {
             ],
           ),
         ),
+        rpi: (context, child) => Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 50,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              PuzzleLogo(),
+              PuzzleMenu(),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -208,6 +220,18 @@ class PuzzleSections extends StatelessWidget {
         ],
       ),
       large: (context, child) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: theme.layoutDelegate.startSectionBuilder(state),
+          ),
+          const PuzzleBoard(),
+          Expanded(
+            child: theme.layoutDelegate.endSectionBuilder(state),
+          ),
+        ],
+      ),
+      rpi: (context, child) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
@@ -304,6 +328,7 @@ class PuzzleMenu extends StatelessWidget {
           small: (_, child) => const SizedBox(),
           medium: (_, child) => child!,
           large: (_, child) => child!,
+          rpi: (_, child) => child!,
           child: (currentSize) {
             return Row(
               children: [
@@ -362,6 +387,7 @@ class PuzzleMenuItem extends StatelessWidget {
       ),
       medium: (_, child) => child!,
       large: (_, child) => child!,
+      rpi: (_, child) => child!,
       child: (currentSize) {
         final leftPadding =
             themeIndex > 0 && currentSize != ResponsiveLayoutSize.small

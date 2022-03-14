@@ -4,9 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:very_good_slide_puzzle/colors/colors.dart';
 import 'package:very_good_slide_puzzle/l10n/l10n.dart';
 import 'package:very_good_slide_puzzle/layout/layout.dart';
-import 'package:very_good_slide_puzzle/models/face_values.dart';
+import 'package:very_good_slide_puzzle/constants/face_values.dart';
 import 'package:very_good_slide_puzzle/models/models.dart';
-import 'package:very_good_slide_puzzle/models/sizes.dart';
+import 'package:very_good_slide_puzzle/constants/sizes.dart';
 import 'package:very_good_slide_puzzle/puzzle/puzzle.dart';
 import 'package:very_good_slide_puzzle/simple/cube_puzzle_tile.dart';
 import 'package:very_good_slide_puzzle/simple/simple.dart';
@@ -24,12 +24,14 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
   @override
   Widget startSectionBuilder(PuzzleState state) {
     return ResponsiveLayoutBuilder(
+      
       small: (_, child) => child!,
       medium: (_, child) => child!,
       large: (_, child) => Padding(
         padding: const EdgeInsets.only(left: 50, right: 32),
         child: child,
       ),
+      rpi: (_, child) => child!,
       child: (_) => SimpleStartSection(state: state),
     );
   }
@@ -43,9 +45,14 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           medium: 48,
         ),
         ResponsiveLayoutBuilder(
-          small: (_, child) => const SimplePuzzleResetButton(),
-          medium: (_, child) => const SimplePuzzleResetButton(),
+          small: (_, child) => state.puzzle.isComplete()
+                ? const SimplePuzzleShuffleButton()
+                : const SimplePuzzleResetButton(),
+          medium: (_, child) => state.puzzle.isComplete()
+                ? const SimplePuzzleShuffleButton()
+                : const SimplePuzzleResetButton(),
           large: (_, __) => const SizedBox(),
+          rpi: (_, __) => const SizedBox(),
         ),
         const ResponsiveGap(
           small: 32,
@@ -66,7 +73,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           height: 118,
           child: Image.asset(
             'assets/images/kdab_labs_small.png',
-            key: const Key('simple_puzzle_dash_small'),
+            key: const Key('kdab_labs_small'),
           ),
         ),
         medium: (_, __) => SizedBox(
@@ -74,7 +81,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           height: 214,
           child: Image.asset(
             'assets/images/kdab_labs_small.png',
-            key: const Key('simple_puzzle_dash_medium'),
+            key: const Key('kdab_labs_medium'),
           ),
         ),
         large: (_, __) => Padding(
@@ -84,7 +91,18 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
             height: 333,
             child: Image.asset(
               'assets/images/kdab_labs_small.png',
-              key: const Key('simple_puzzle_dash_large'),
+              key: const Key('kdab_labs_large'),
+            ),
+          ),
+        ),
+        rpi: (_, __) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: SizedBox(
+            width: 50,
+            height: 50,
+            child: Image.asset(
+              'assets/images/kdab_labs_small.png',
+              key: const Key('kdab_labs_large'),
             ),
           ),
         ),
@@ -105,7 +123,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           small: (_, __) => SizedBox.square(
             dimension: _BoardSize.small,
             child: SimplePuzzleBoard(
-              key: const Key('simple_puzzle_board_small'),
+              key: const Key('cube_puzzle_board_small'),
               size: size,
               tiles: tiles,
               spacing: 5,
@@ -114,7 +132,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           medium: (_, __) => SizedBox.square(
             dimension: _BoardSize.medium,
             child: SimplePuzzleBoard(
-              key: const Key('simple_puzzle_board_medium'),
+              key: const Key('cube_puzzle_board_medium'),
               size: size,
               tiles: tiles,
             ),
@@ -122,7 +140,15 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           large: (_, __) => SizedBox.square(
             dimension: _BoardSize.large,
             child: SimplePuzzleBoard(
-              key: const Key('simple_puzzle_board_large'),
+              key: const Key('cube_puzzle_board_large'),
+              size: size,
+              tiles: tiles,
+            ),
+          ),
+          rpi: (_, __) => SizedBox.square(
+            dimension: _BoardSize.rpi,
+            child: SimplePuzzleBoard(
+              key: const Key('cube_puzzle_board_rpi'),
               size: size,
               tiles: tiles,
             ),
@@ -163,6 +189,8 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
               ),
               large: (_, child) =>
                   SizedBox.square(dimension: TileSize.large, child: child),
+              rpi: (_, child) =>
+                  SizedBox.square(dimension: TileSize.rpi, child: child),
               child: (_) => TextButton(
                 child: Text(""),
                 onPressed: () {},
@@ -212,6 +240,7 @@ class SimpleStartSection extends StatelessWidget {
           small: 20,
           medium: 83,
           large: 151,
+          rpi:30
         ),
         const ResponsiveGap(
           large: 32,
@@ -225,15 +254,19 @@ class SimpleStartSection extends StatelessWidget {
           small: 12,
           medium: 16,
           large: 32,
+          rpi: 12,
         ),
         IgnorePointer(
-          ignoring: state.isBusy,
+          ignoring: state.isBusy && !state.puzzle.isComplete(),
           child: ResponsiveLayoutBuilder(
             small: (_, __) => const SizedBox(),
             medium: (_, __) => const SizedBox(),
             large: (_, __) => state.puzzle.isComplete()
-                ? SimplePuzzleShuffleButton()
-                : SimplePuzzleResetButton(),
+                ? const SimplePuzzleShuffleButton()
+                : const SimplePuzzleResetButton(),
+            rpi: (_, __) => state.puzzle.isComplete()
+                ? const SimplePuzzleShuffleButton()
+                : const SimplePuzzleResetButton(),
           ),
         )
       ],
@@ -272,6 +305,7 @@ abstract class _BoardSize {
   static double small = 312;
   static double medium = 424;
   static double large = 472;
+  static double rpi = 200;
 }
 
 /// {@template simple_puzzle_board}

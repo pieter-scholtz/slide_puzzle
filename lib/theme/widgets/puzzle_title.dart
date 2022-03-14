@@ -42,10 +42,15 @@ class PuzzleTitle extends StatelessWidget {
         width: 350,
         child: child,
       ),
+      rpi: (context, child) => SizedBox(
+        width: 150,
+        child: child,
+      ),
       child: (currentSize) {
+
         final textStyle = (currentSize == ResponsiveLayoutSize.large
                 ? PuzzleTextStyle.headline2
-                : PuzzleTextStyle.headline3)
+                : PuzzleTextStyle.headline4)
             .copyWith(color: titleColor);
 
         final textAlign = currentSize == ResponsiveLayoutSize.small
