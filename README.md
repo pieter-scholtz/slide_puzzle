@@ -1,3 +1,7 @@
+
+# Building for RPI
+
+When building for raspberry pi comment out ln 60 inside responsive_layout_builder.dart
 # Slide Puzzle
 
 ![Photo Booth Header][logo]
@@ -9,6 +13,8 @@
 A slide puzzle built for [Flutter Challenge](https://flutterhack.devpost.com/).
 
 *Built by [Very Good Ventures][very_good_ventures_link] in partnership with Google.*
+
+*modified by pieter-scholtz from KDAB*
 
 *Created using [Very Good CLI][very_good_cli_link].*
 
@@ -24,25 +30,6 @@ $ flutter run -d chrome
 
 ---
 
-## Running Tests 🧪
-
-To run all unit and widget tests use the following command:
-
-```sh
-$ flutter test --coverage --test-randomize-ordering-seed random
-```
-
-To view the generated coverage report you can use [lcov](https://github.com/linux-test-project/lcov).
-
-```sh
-# Generate Coverage Report
-$ genhtml coverage/lcov.info -o coverage/
-
-# Open Coverage Report
-$ open coverage/index.html
-```
-
----
 
 ## Working with Translations 🌐
 

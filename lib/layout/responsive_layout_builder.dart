@@ -57,7 +57,8 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
       builder: (context, constraints) {
         final screenWidth = MediaQuery.of(context).size.width;
 
-        return rpi(context, child?.call(ResponsiveLayoutSize.rpi));
+        //Uncomment line below when building for raspberry Pi
+        //return rpi(context, child?.call(ResponsiveLayoutSize.rpi));
 
          if (screenWidth <= PuzzleBreakpoints.small) {
            return small(context, child?.call(ResponsiveLayoutSize.small));

@@ -235,10 +235,12 @@ class PuzzleSections extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            flex: 3,
             child: theme.layoutDelegate.startSectionBuilder(state),
           ),
           const PuzzleBoard(),
           Expanded(
+            flex: 2,
             child: theme.layoutDelegate.endSectionBuilder(state),
           ),
         ],

@@ -98,8 +98,8 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
         rpi: (_, __) => Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: SizedBox(
-            width: 50,
-            height: 50,
+            width: 130,
+            height: 180,
             child: Image.asset(
               'assets/images/kdab_labs_small.png',
               key: const Key('kdab_labs_large'),
@@ -234,7 +234,7 @@ class SimpleStartSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const ResponsiveGap(
           small: 20,
@@ -428,7 +428,7 @@ class SimplePuzzleResetButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/images/shuffle_icon.png',
+            'assets/images/reset_icon.png',
             width: 17,
             height: 17,
           ),

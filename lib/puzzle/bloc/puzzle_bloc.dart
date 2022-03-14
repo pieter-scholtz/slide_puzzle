@@ -85,14 +85,14 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
     for (var i = _movesCopy.length - 1; i >= 0; i--) {
       print(_movesCopy[i]);
 
-      await Future.delayed(const Duration(milliseconds: 300), () {
+      await Future.delayed(const Duration(milliseconds: 555), () {
         this.add(TileTapped(
           state.puzzle.tiles.singleWhere((tile) => tile.value == _movesCopy[i]),
         ));
       });
     }
 
-    await Future.delayed(const Duration(milliseconds: 600), () {
+    await Future.delayed(const Duration(milliseconds: 555), () {
       emit(
         state.copyWith(isBusy: false),
       );
@@ -108,13 +108,11 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
 
     int previousTileValue = 0;
 
-    for (var i = 1; i <= 10; i++) {
+    for (var i = 1; i <= 25; i++) {
       await Future.delayed(const Duration(milliseconds: 600), () {
         List<Tile> tiles = state.puzzle.tiles.where((tile) {
           return (state.puzzle.isTileMovable(tile));
         }).toList();
-
-        print("movable tiles : " + tiles.toString());
 
         tiles.removeWhere((tile) => tile.value == previousTileValue);
 
@@ -131,7 +129,6 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
           }
 
           int tileValue = Random().nextInt(tiles.length);
-          print("selected tile value : " + tileValue.toString());
 
           tile = tiles[tileValue];
         }
@@ -139,7 +136,6 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
 
         previousTileValue = tile.value;
 
-        print("shuffler tapping :" + tile.value.toString());
         this.add(TileTapped(tile));
       });
     }
