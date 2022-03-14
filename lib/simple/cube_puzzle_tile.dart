@@ -95,10 +95,10 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
   final Duration _movementDuration = const Duration(milliseconds: 555);
 
   late Color _face1Color =
-      faceColors[widget.tile.value][widget.tile.cube!.visibleFace.index];
+      faceColors[widget.tile.cube!.visibleFace.index];
 
   late Color _face2color =
-      faceColors[widget.tile.value][widget.tile.cube!.visibleFace.index];
+      faceColors[widget.tile.cube!.visibleFace.index];
 
   late AlignmentGeometry _face1PositionAlignment = Alignment.center;
 
@@ -372,12 +372,12 @@ class CubePuzzleTileState extends State<CubePuzzleTile>
         );
       }
 
-      _face1Color = faceColors[widget.tile.value][cube.visibleFace.index];
+      _face1Color = faceColors[cube.visibleFace.index];
 
       Cube rolledcube = rollCube(
           cube: widget.tile.cube!, movementDirection: movementDirection);
 
-      _face2color = faceColors[widget.tile.value][rolledcube.visibleFace.index];
+      _face2color = faceColors[rolledcube.visibleFace.index];
     }
   }
 

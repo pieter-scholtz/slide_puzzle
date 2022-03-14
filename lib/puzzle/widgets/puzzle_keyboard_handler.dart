@@ -48,21 +48,21 @@ class _PuzzleKeyboardHandlerState extends State<PuzzleKeyboardHandler> {
   void _handleKeyEvent(RawKeyEvent event) {
 
     if (event is RawKeyDownEvent) {
-      final puzzle = context.read<PuzzleBloc>().state.puzzle;
+      final state = context.read<PuzzleBloc>().state;
       final physicalKey = event.data.physicalKey;
 
       Tile? tile;
       if (physicalKey == PhysicalKeyboardKey.arrowDown) {
-        tile = puzzle.getTileRelativeToWhitespaceTile(const Offset(0, -1));
+        tile = state.puzzle.getTileRelativeToWhitespaceTile(const Offset(0, -1));
       } else if (physicalKey == PhysicalKeyboardKey.arrowUp) {
-        tile = puzzle.getTileRelativeToWhitespaceTile(const Offset(0, 1));
+        tile = state.puzzle.getTileRelativeToWhitespaceTile(const Offset(0, 1));
       } else if (physicalKey == PhysicalKeyboardKey.arrowRight) {
-        tile = puzzle.getTileRelativeToWhitespaceTile(const Offset(-1, 0));
+        tile = state.puzzle.getTileRelativeToWhitespaceTile(const Offset(-1, 0));
       } else if (physicalKey == PhysicalKeyboardKey.arrowLeft) {
-        tile = puzzle.getTileRelativeToWhitespaceTile(const Offset(1, 0));
+        tile = state.puzzle.getTileRelativeToWhitespaceTile(const Offset(1, 0));
       }
 
-      if (tile != null) {
+      if ((tile != null) && !(state.isBusy)) {
         context.read<PuzzleBloc>().add(TileTapped(tile));
       }
     }

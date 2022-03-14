@@ -37,7 +37,7 @@ import 'package:very_good_slide_puzzle/models/models.dart';
 /// {@endtemplate}
 class Puzzle extends Equatable {
   /// {@macro puzzle}
-   const Puzzle({required this.tiles});
+  const Puzzle({required this.tiles});
 
   /// List of [Tile]s representing the puzzle's current arrangement.
   final List<Tile> tiles;
@@ -73,12 +73,8 @@ class Puzzle extends Equatable {
     var numberOfCorrectTiles = 0;
     for (final tile in tiles) {
       if (tile != whitespaceTile) {
-        //(faceValues[tile.value][tile.cube!.visibleFace.index] ==
-        //    correctFaceValues[tile.currentPosition.y - 1]
-        //        [tile.currentPosition.x - 1])
-        //print(faceColors[0][tiles[0].cube!.visibleFace.index].value);
-        if (faceColors[tile.value][tile.cube!.visibleFace.index].value ==
-            faceColors[0][tiles[0].cube!.visibleFace.index].value) {
+        if (faceColors[tile.cube!.visibleFace.index].value ==
+            faceColors[tiles[0].cube!.visibleFace.index].value) {
           numberOfCorrectTiles++;
         }
       }
@@ -91,8 +87,6 @@ class Puzzle extends Equatable {
     return (tiles.length - 1) - getNumberOfCorrectTiles() == 0;
   }
 
-
-
   /// Determines if the tapped tile can move in the direction of the whitespace
   /// tile.
   bool isTileMovable(Tile tile) {
@@ -101,12 +95,18 @@ class Puzzle extends Equatable {
       return false;
     }
 
-    // A tile must be in the same row or column as the whitespace to move.
-    if (whitespaceTile.currentPosition.x != tile.currentPosition.x &&
-        whitespaceTile.currentPosition.y != tile.currentPosition.y) {
-      return false;
-    }
-    return true;
+    //A tile must be next to a whitespace tile in order to be moved.
+    return (((tile.currentPosition.x - whitespaceTile.currentPosition.x)
+                    .abs() ==
+                1) &&
+            ((tile.currentPosition.y - whitespaceTile.currentPosition.y)
+                    .abs() ==
+                0)) ||
+        (((tile.currentPosition.y - whitespaceTile.currentPosition.y).abs() ==
+                1) &&
+            ((tile.currentPosition.x - whitespaceTile.currentPosition.x)
+                    .abs() ==
+                0));
   }
 
   /// Determines if the puzzle is solvable.
@@ -236,8 +236,6 @@ class Puzzle extends Equatable {
       tiles[whitespaceTileIndex] = whitespaceTile.copyWith(
         updatedCurrentPosition: tile.currentPosition,
       );
-
-      print(updatedCube.visibleFace);
     }
 
     return Puzzle(tiles: tiles);

@@ -43,6 +43,7 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
 
   void _onTileTapped(TileTapped event, Emitter<PuzzleState> emit) {
     final tappedTile = event.tile;
+    print("tile tapped : " + tappedTile.value.toString());
     if (state.puzzleStatus == PuzzleStatus.incomplete) {
       if (state.puzzle.isTileMovable(tappedTile)) {
         _moves.add(tappedTile.value);
@@ -53,7 +54,6 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
             state.copyWith(
               puzzle: puzzle.sort(),
               puzzleStatus: PuzzleStatus.complete,
-              tileMovementStatus: TileMovementStatus.moved,
               numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
               numberOfMoves: state.score + 1,
               lastTappedTile: tappedTile,
@@ -63,24 +63,15 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
           emit(
             state.copyWith(
               puzzle: puzzle.sort(),
-              tileMovementStatus: TileMovementStatus.moved,
               numberOfCorrectTiles: puzzle.getNumberOfCorrectTiles(),
               numberOfMoves: state.score + 1,
               lastTappedTile: tappedTile,
             ),
           );
         }
-      } else {
-        //emit(
-        //  state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
-        //);
-      }
-    } else {
-      //emit(
-      //  state.copyWith(tileMovementStatus: TileMovementStatus.cannotBeMoved),
-      //);
-    }
-    print(_moves);
+      } else {}
+    } else {}
+    //print(_moves);
   }
 
   void _onPuzzleReset(PuzzleReset event, Emitter<PuzzleState> emit) async {
@@ -115,18 +106,44 @@ class PuzzleBloc extends Bloc<PuzzleEvent, PuzzleState> {
       state.copyWith(isBusy: true, puzzleStatus: PuzzleStatus.incomplete),
     );
 
-    List<int> shuffleMoves = [15,14,13];
+    int previousTileValue = 0;
 
-    for (var i = 0; i <= shuffleMoves.length - 1; i++) {
-      print(shuffleMoves[i]);
+    for (var i = 1; i <= 10; i++) {
+      await Future.delayed(const Duration(milliseconds: 600), () {
+        List<Tile> tiles = state.puzzle.tiles.where((tile) {
+          return (state.puzzle.isTileMovable(tile));
+        }).toList();
 
-      await Future.delayed(const Duration(milliseconds: 300), () {
-        this.add(TileTapped(
-          state.puzzle.tiles
-              .singleWhere((tile) => tile.value == shuffleMoves[i]),
-        ));
+        print("movable tiles : " + tiles.toString());
+
+        tiles.removeWhere((tile) => tile.value == previousTileValue);
+
+        Tile? tile = null;
+
+        while (tile == null) {
+          //loop through movable cubes
+          tiles.shuffle();
+          for (var i = 0; i <= tiles.length - 1; i++) {
+            //find a unmoved cubed
+            if (!(_moves.any((tileValue) => tiles[i].value == tileValue))) {
+              tile = tiles[i];
+            }
+          }
+
+          int tileValue = Random().nextInt(tiles.length);
+          print("selected tile value : " + tileValue.toString());
+
+          tile = tiles[tileValue];
+        }
+        ;
+
+        previousTileValue = tile.value;
+
+        print("shuffler tapping :" + tile.value.toString());
+        this.add(TileTapped(tile));
       });
     }
+
     await Future.delayed(const Duration(milliseconds: 600), () {
       emit(
         state.copyWith(isBusy: false),

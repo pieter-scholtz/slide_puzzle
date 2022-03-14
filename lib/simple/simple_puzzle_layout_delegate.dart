@@ -78,8 +78,7 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
           ),
         ),
         large: (_, __) => Padding(
-          padding: const EdgeInsets.only(bottom: 20
-          ),
+          padding: const EdgeInsets.only(bottom: 20),
           child: SizedBox(
             width: 333,
             height: 333,
@@ -139,49 +138,51 @@ class SimplePuzzleLayoutDelegate extends PuzzleLayoutDelegate {
   @override
   Widget tileBuilder(Tile tile, PuzzleState state) {
     return CubePuzzleTile(
-        tile: tile,
-        state: state,
-      );
+      tile: tile,
+      state: state,
+    );
   }
 
   @override
-  Widget whitespaceTileBuilder(Tile tile,PuzzleState state) {
-
-      final whiteSpace = 
-        Align(
-                    alignment: FractionalOffset(
-                      (tile.currentPosition.x - 1) / (4 - 1),
-                      (tile.currentPosition.y - 1) / (4 - 1),
-                    ),
-                    child: ResponsiveLayoutBuilder(
-            small: (_, child) => SizedBox.square(
-              dimension: TileSize.small,
-              child: child,
+  Widget whitespaceTileBuilder(Tile tile, PuzzleState state) {
+    final whiteSpace = IgnorePointer(
+        ignoring: state.puzzleStatus == PuzzleStatus.complete,
+        child: Align(
+            alignment: FractionalOffset(
+              (tile.currentPosition.x - 1) / (4 - 1),
+              (tile.currentPosition.y - 1) / (4 - 1),
             ),
-            medium: (_, child) => SizedBox.square(
-              dimension: TileSize.medium,
-              child: child,
-            ),
-            large: (_, child) => SizedBox.square(
-                dimension: TileSize.large,
-                child: child),
-            child: (_) => TextButton(
-                    
-                      child: Text(""),
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        backgroundColor: faceColors[0][state.puzzle.tiles[0].cube!.visibleFace.index],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(3)),
-                        ),
-                      ),
-                    ),
-          ));
-    
-    return AnimatedSwitcher(switchOutCurve:const Interval(0.5, 1, curve: Curves.linear),switchInCurve:const Interval(0.5, 1, curve: Curves.linear),duration: Duration(milliseconds: 1000),child:  state.puzzleStatus == PuzzleStatus.incomplete
-        ? const SizedBox(): whiteSpace);
+            child: ResponsiveLayoutBuilder(
+              small: (_, child) => SizedBox.square(
+                dimension: TileSize.small,
+                child: child,
+              ),
+              medium: (_, child) => SizedBox.square(
+                dimension: TileSize.medium,
+                child: child,
+              ),
+              large: (_, child) =>
+                  SizedBox.square(dimension: TileSize.large, child: child),
+              child: (_) => TextButton(
+                child: Text(""),
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  backgroundColor:
+                      faceColors[state.puzzle.tiles[0].cube!.visibleFace.index],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                  ),
+                ),
+              ),
+            )));
 
-    
+    return AnimatedSwitcher(
+        switchOutCurve: const Interval(0.5, 1, curve: Curves.linear),
+        switchInCurve: const Interval(0.5, 1, curve: Curves.linear),
+        duration: Duration(milliseconds: 1000),
+        child: state.puzzleStatus == PuzzleStatus.incomplete
+            ? const SizedBox()
+            : whiteSpace);
   }
 
   @override
@@ -212,13 +213,10 @@ class SimpleStartSection extends StatelessWidget {
           medium: 83,
           large: 151,
         ),
-        // PuzzleName(
-        //   key: puzzleNameKey,
-        // ),
         const ResponsiveGap(
-           large: 32,
-           small: 16,
-         ),
+          large: 32,
+          small: 16,
+        ),
         const ResponsiveGap(large: 16),
         SimplePuzzleTitle(
           status: state.puzzleStatus,
@@ -228,19 +226,16 @@ class SimpleStartSection extends StatelessWidget {
           medium: 16,
           large: 32,
         ),
-        // Score(
-        //   key: numberOfMovesAndTilesLeftKey,
-        //   score: state.score,
-        // ),
-        // const ResponsiveGap(
-        //   large: 32,
-        //   small: 16,
-        // ),
-        ResponsiveLayoutBuilder(
-          small: (_, __) => const SizedBox(),
-          medium: (_, __) => const SizedBox(),
-          large: (_, __) => state.puzzle.isComplete() ? SimplePuzzleShuffleButton() : SimplePuzzleResetButton() ,
-        ),
+        IgnorePointer(
+          ignoring: state.isBusy,
+          child: ResponsiveLayoutBuilder(
+            small: (_, __) => const SizedBox(),
+            medium: (_, __) => const SizedBox(),
+            large: (_, __) => state.puzzle.isComplete()
+                ? SimplePuzzleShuffleButton()
+                : SimplePuzzleResetButton(),
+          ),
+        )
       ],
     );
   }
@@ -267,9 +262,8 @@ class SimplePuzzleTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return PuzzleTitle(
       key: puzzleTitleKey,
-      title: context.l10n.puzzleChallengeTitle,//status == PuzzleStatus.complete
-          //? context.l10n.puzzleCompleted
-          //: context.l10n.puzzleChallengeTitle,
+      title:
+          context.l10n.puzzleChallengeTitle,
     );
   }
 }
